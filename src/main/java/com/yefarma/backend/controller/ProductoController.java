@@ -1,0 +1,58 @@
+package com.yefarma.backend.controller;
+
+import com.yefarma.backend.model.FormaFarmaceutica;
+import com.yefarma.backend.model.Producto;
+import com.yefarma.backend.model.TipoProducto;
+import com.yefarma.backend.repository.FormaFarmaceuticaRepository;
+import com.yefarma.backend.repository.ProductoRepository;
+import com.yefarma.backend.repository.TipoProductoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/productos")
+@CrossOrigin(origins = "http://localhost:4200") // Permite que Angular se conecte
+public class ProductoController {
+
+    @Autowired
+    private ProductoRepository productoRepository;
+
+    @Autowired
+    private TipoProductoRepository tipoProductoRepository;
+
+    @Autowired
+    private FormaFarmaceuticaRepository formaFarmaceuticaRepository;
+
+    // 1. Obtener todos los tipos (para el primer Dropdown)
+    @GetMapping("/tipos")
+    public List<TipoProducto> listarTipos() {
+        return tipoProductoRepository.findAll();
+    }
+
+    // 2. Obtener todas las formas (para el segundo Dropdown)
+    @GetMapping("/formas")
+    public List<FormaFarmaceutica> listarFormas() {
+        return formaFarmaceuticaRepository.findAll();
+    }
+
+    // 3. Guardar el nuevo producto
+    @PostMapping("/registrar")
+    public ResponseEntity<Map<String, String>> registrarProducto(@RequestBody Producto producto) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            productoRepository.save(producto);
+            response.put("status", "success");
+            response.put("message", "Producto registrado correctamente");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", "Error al registrar: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+}
