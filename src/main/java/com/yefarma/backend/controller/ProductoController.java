@@ -3,9 +3,13 @@ package com.yefarma.backend.controller;
 import com.yefarma.backend.model.FormaFarmaceutica;
 import com.yefarma.backend.model.Producto;
 import com.yefarma.backend.model.TipoProducto;
+import com.yefarma.backend.model.Marca;
+import com.yefarma.backend.model.Presentacion;
 import com.yefarma.backend.repository.FormaFarmaceuticaRepository;
 import com.yefarma.backend.repository.ProductoRepository;
 import com.yefarma.backend.repository.TipoProductoRepository;
+import com.yefarma.backend.repository.MarcaRepository;
+import com.yefarma.backend.repository.PresentacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/productos")
@@ -28,6 +35,12 @@ public class ProductoController {
     @Autowired
     private FormaFarmaceuticaRepository formaFarmaceuticaRepository;
 
+    @Autowired
+    private MarcaRepository marcaRepository;
+
+    @Autowired
+    private PresentacionRepository presentacionRepository;
+
     // 1. Obtener todos los tipos (para el primer Dropdown)
     @GetMapping("/tipos")
     public List<TipoProducto> listarTipos() {
@@ -38,6 +51,16 @@ public class ProductoController {
     @GetMapping("/formas")
     public List<FormaFarmaceutica> listarFormas() {
         return formaFarmaceuticaRepository.findAll();
+    }
+
+    @GetMapping("/marcas")
+    public List<Marca> listarMarcas() {
+        return marcaRepository.findAll();
+    }
+
+    @GetMapping("/presentaciones")
+    public List<Presentacion> listarPresentaciones() {
+        return presentacionRepository.findAll();
     }
 
     // 3. Guardar el nuevo producto
@@ -54,5 +77,16 @@ public class ProductoController {
             response.put("message", "Error al registrar: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+    }
+
+    @GetMapping("/listar")
+    public List<Producto> listarTodos() {
+        return productoRepository.findAll();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarProducto(@PathVariable Integer id) {
+        productoRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

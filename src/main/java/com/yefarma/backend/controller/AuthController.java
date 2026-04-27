@@ -3,6 +3,7 @@ package com.yefarma.backend.controller;
 import com.yefarma.backend.model.Usuario;
 import com.yefarma.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:4200")
+
 public class AuthController {
 
     @Autowired
@@ -35,7 +37,7 @@ public class AuthController {
                 response.put("status", "success");
                 response.put("nombre", usuario.getNombre());
                 response.put("username", usuario.getNombreUser());
-                response.put("rol", usuario.getId_rol()); 
+                response.put("rol", usuario.getId_rol());
 
                 return ResponseEntity.ok(response);
             }
@@ -45,5 +47,19 @@ public class AuthController {
         error.put("status", "error");
         error.put("message", "Usuario o contraseña incorrectos");
         return ResponseEntity.status(401).body(error);
+    }
+
+    @GetMapping("/check-db")
+    public ResponseEntity<Map<String, Object>> checkDatabase() {
+    Map<String, Object> response = new HashMap<>();
+    try {
+        // Una consulta simple para verificar conexión
+        usuarioRepository.count(); 
+        response.put("status", "UP");
+        return ResponseEntity.ok(response);
+    } catch (Exception e) {
+        response.put("status", "DOWN");
+        response.put("error", "No se pudo conectar con la base de datos");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);}
     }
 }

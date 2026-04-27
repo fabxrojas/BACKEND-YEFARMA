@@ -31,6 +31,14 @@ public class Producto {
     @JoinColumn(name = "id_forma_farma")
     private FormaFarmaceutica formaFarmaceutica;
 
+    @ManyToOne
+    @JoinColumn(name = "id_marca")
+    private Marca marca;
+
+    @ManyToOne
+    @JoinColumn(name = "id_presentacion")
+    private Presentacion presentacion;
+
     @Column(name = "FechaCreacion", insertable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 
@@ -57,6 +65,12 @@ public class Producto {
 
     public FormaFarmaceutica getFormaFarmaceutica() { return formaFarmaceutica; }
     public void setFormaFarmaceutica(FormaFarmaceutica formaFarmaceutica) { this.formaFarmaceutica = formaFarmaceutica; }
+
+    public Marca getMarca() { return marca; }
+    public void setMarca(Marca marca) { this.marca = marca; }
+
+    public Presentacion getPresentacion() { return presentacion; }
+    public void setPresentacion(Presentacion presentacion) { this.presentacion = presentacion; }
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
