@@ -12,7 +12,7 @@ public class Marca {
     @Column(name = "Nombre") // Debe ser idéntico al SQL
     private String nombre;
 
-    @Column(name = "FechaCreacion", insertable = false, updatable = false) // Debe ser idéntico al SQL
+    @Column(name = "FechaCreacion", insertable = false, updatable = false) 
     private LocalDateTime fechaCreacion; // Campo para almacenar la fecha de creación
 
     public Marca() {

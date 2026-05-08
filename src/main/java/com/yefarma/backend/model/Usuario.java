@@ -1,6 +1,7 @@
 package com.yefarma.backend.model;
 
 import jakarta.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "usuario")
@@ -8,19 +9,32 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_usuario") 
     private Integer id_usuario;
 
-    @Column(name = "Nombre")
+    @Column(name = "Nombre", nullable = false)
     private String nombre;
 
-    @Column(name = "`NombreUser`") // Agregamos estas comillas invertidas para que respete las mayúsculas
+    @Column(name = "Apellido_P")
+    private String apellidoP;
+
+    @Column(name = "Apellido_M")
+    private String apellidoM;
+
+    @Column(name = "id_rol")
+    private Integer idRol;
+
+    @Column(name = "NombreUser", unique = true)
     private String nombreUser;
+
+    @Column(name = "Correo", unique = true)
+    private String correo;
 
     @Column(name = "Contrasena")
     private String contrasena;
 
-    @Column(name = "`id_rol`")
-    private Integer id_rol;
+    @Column(name = "FechaCreacion", insertable = false, updatable = false)
+    private Timestamp fechaCreacion;
 
     public Integer getId_usuario() {
         return id_usuario;
@@ -38,12 +52,44 @@ public class Usuario {
         this.nombre = nombre;
     }
 
+    public String getApellidoP() {
+        return apellidoP;
+    }
+
+    public void setApellidoP(String apellidoP) {
+        this.apellidoP = apellidoP;
+    }
+
+    public String getApellidoM() {
+        return apellidoM;
+    }
+
+    public void setApellidoM(String apellidoM) {
+        this.apellidoM = apellidoM;
+    }
+
+    public Integer getIdRol() {
+        return idRol;
+    }
+
+    public void setIdRol(Integer idRol) {
+        this.idRol = idRol;
+    }
+
     public String getNombreUser() {
         return nombreUser;
     }
 
     public void setNombreUser(String nombreUser) {
         this.nombreUser = nombreUser;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
     }
 
     public String getContrasena() {
@@ -54,12 +100,11 @@ public class Usuario {
         this.contrasena = contrasena;
     }
 
-    public Integer getId_rol() {
-        return id_rol;
+    public Timestamp getFechaCreacion() {
+        return fechaCreacion;
     }
 
-    public void setId_rol(Integer id_rol) {
-        this.id_rol = id_rol;
+    public void setFechaCreacion(Timestamp fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
     }
-
 }

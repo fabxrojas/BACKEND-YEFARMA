@@ -11,15 +11,13 @@ import com.yefarma.backend.repository.TipoProductoRepository;
 import com.yefarma.backend.repository.MarcaRepository;
 import com.yefarma.backend.repository.PresentacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 @RestController
 @RequestMapping("/api/productos")
@@ -53,12 +51,14 @@ public class ProductoController {
         return formaFarmaceuticaRepository.findAll();
     }
 
-    @GetMapping("/marcas")
-    public List<Marca> listarMarcas() {
-        return marcaRepository.findAll();
+    @GetMapping("/{id}/marcas")
+    public ResponseEntity<List<Marca>> getMarcasPorProducto(@PathVariable Integer id) {
+        // Esta lógica asume que tienes el método en tu repositorio
+        List<Marca> marcas = productoRepository.findMarcasByProductoId(id);
+        return ResponseEntity.ok(marcas);
     }
 
-    @GetMapping("/presentaciones")
+    @GetMapping("presentaciones")
     public List<Presentacion> listarPresentaciones() {
         return presentacionRepository.findAll();
     }
@@ -76,6 +76,16 @@ public class ProductoController {
             response.put("status", "error");
             response.put("message", "Error al registrar: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Producto>> buscarProductos(@RequestParam String query) {
+        try {
+            List<Producto> encontrados = productoRepository.findByProductoContainingIgnoreCase(query);
+            return new ResponseEntity<>(encontrados, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
