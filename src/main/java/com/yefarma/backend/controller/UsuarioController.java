@@ -5,9 +5,14 @@ import com.yefarma.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -68,6 +73,39 @@ public class UsuarioController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/recuperar-contrasena")
+    public ResponseEntity<?> solicitarRecuperacion(@RequestBody Map<String, String> request) {
+        String correo = request.get("correo"); // Así extraes solo el email
+
+        return usuarioRepository.findByCorreo(correo).map(usuario -> {
+            String token = UUID.randomUUID().toString();
+            usuario.setResetToken(token);
+            usuario.setTokenExpiracion(LocalDateTime.now().plusHours(2));
+
+            usuarioRepository.save(usuario); 
+            enviarEmail(usuario.getCorreo(), token);
+
+            return ResponseEntity.ok("Enlace enviado.");
+        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Correo no encontrado"));
+    }
+
+    @PostMapping("/cambiar-contrasena")
+    public ResponseEntity<?> cambiarPassword(@RequestBody Map<String, String> datos) {
+        String token = datos.get("token");
+        String nuevaContrasena = datos.get("password");
+
+        return usuarioRepository.findByResetToken(token).map(usuario -> {
+            if (usuario.getTokenExpiracion().isBefore(LocalDateTime.now())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El token ha expirado.");
+            }
+            usuario.setContrasena(nuevaContrasena);
+            usuario.setResetToken(null); // Limpiar token usado
+            usuario.setTokenExpiracion(null);
+            usuarioRepository.save(usuario);
+            return ResponseEntity.ok("Contraseña actualizada con éxito.");
+        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Token inválido."));
+    }
+
     // 4. ELIMINAR USUARIO
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarUsuario(@PathVariable Integer id) {
@@ -79,4 +117,18 @@ public class UsuarioController {
                     .body("Error al eliminar: " + e.getMessage());
         }
     }
+
+    @Autowired
+    private JavaMailSender mailSender; // Asegúrate de tener la dependencia spring-boot-starter-mail
+
+    private void enviarEmail(String destino, String token) {
+        SimpleMailMessage mensaje = new SimpleMailMessage();
+        mensaje.setTo(destino);
+        mensaje.setSubject("Recuperación de Contraseña - Yefarma");
+        mensaje.setText("Para restablecer tu contraseña, haz clic en el siguiente enlace: " +
+                "http://localhost:4200/restablecer-contrasena?token=" + token);
+
+        mailSender.send(mensaje);
+    }
+
 }

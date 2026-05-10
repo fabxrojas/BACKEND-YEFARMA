@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "unidades_detalle", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"id_unid_medi", "cantidad"})
+    @UniqueConstraint(columnNames = {"id_unidad", "cantidad"})
 })
 public class UnidadesDetalle {
 
@@ -16,7 +16,7 @@ public class UnidadesDetalle {
 
     // Relación con la tabla maestra de unidades de medida (Caja, Blister, Unidad, etc.)
     @ManyToOne
-    @JoinColumn(name = "id_unid_medi", nullable = false)
+    @JoinColumn(name = "id_unidad", nullable = false)
     private UnidadMedida unidadMedida; 
 
     @Column(nullable = false, precision = 10, scale = 2)
