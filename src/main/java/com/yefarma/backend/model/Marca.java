@@ -9,7 +9,7 @@ public class Marca {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id_marca;
 
-    @Column(name = "Nombre") // Debe ser idéntico al SQL
+    @Column(name = "Nombre") 
     private String nombre;
 
     @Column(name = "FechaCreacion", insertable = false, updatable = false) 

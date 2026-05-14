@@ -31,13 +31,17 @@ public class Producto {
     @Column(name = "RegistroSanitario")
     private String registroSanitario;
 
+    // NUEVO CAMPO: Necesario para el cálculo de Peso Bruto Total en la Guía
+    @Column(name = "peso_unitario")
+    private BigDecimal pesoUnitario;
+
     @Column(name = "FechaCreacion", insertable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 
     public Producto() {
     }
 
-    // Getters y Setters
+    // Getters y Setters actualizados
     public Integer getId_producto() {
         return id_producto;
     }
@@ -94,6 +98,15 @@ public class Producto {
         this.registroSanitario = registroSanitario;
     }
 
+    // Getter y Setter para el nuevo campo de peso
+    public BigDecimal getPesoUnitario() {
+        return pesoUnitario;
+    }
+
+    public void setPesoUnitario(BigDecimal pesoUnitario) {
+        this.pesoUnitario = pesoUnitario;
+    }
+
     public LocalDateTime getFechaCreacion() {
         return fechaCreacion;
     }
@@ -101,5 +114,4 @@ public class Producto {
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
-
 }

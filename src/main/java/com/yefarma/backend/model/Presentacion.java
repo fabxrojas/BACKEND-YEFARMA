@@ -13,7 +13,7 @@ public class Presentacion {
     @Column(name = "nombre") 
     private String nombre;
 
-    @Column(name = "fecha_creacion", insertable = false, updatable = false) // Con guion bajo como en el SQL
+    @Column(name = "fecha_creacion", insertable = false, updatable = false) 
     private LocalDateTime fechaCreacion;
 
     public Presentacion() {

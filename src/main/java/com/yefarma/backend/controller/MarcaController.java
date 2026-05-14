@@ -38,7 +38,7 @@ public class MarcaController {
         return marcaRepository.findAll();
     }
 
-    // ESCENARIO 1: CREAR NUEVA MARCA Y ASOCIAR
+    //  CREAR NUEVA MARCA Y ASOCIAR
     @PostMapping("/guardar-y-asociar")
     public ResponseEntity<?> guardarYAsociar(@RequestBody Map<String, Object> payload) {
         try {
@@ -63,7 +63,7 @@ public class MarcaController {
         }
     }
 
-    // ESCENARIO 2: ASOCIAR MARCA QUE YA EXISTE (Soluciona el error 404)
+    // ASOCIAR MARCA EXISTENTE A PRODUCTO EXISTENTE
     @PostMapping("/asociar-existente")
     public ResponseEntity<?> asociarExistente(@RequestBody Map<String, Object> payload) {
         try {

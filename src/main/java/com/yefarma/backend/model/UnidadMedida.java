@@ -17,10 +17,7 @@ public class UnidadMedida {
     @Column(name = "Abreviatura")
     private String abreviatura;
 
-    // Constructor vacío exigido por JPA
     public UnidadMedida() {}
-
-    // Getters y Setters
 
     public Integer getIdUnidad() {
         return idUnidad;
@@ -45,4 +42,5 @@ public class UnidadMedida {
     public void setAbreviatura(String abreviatura) {
         this.abreviatura = abreviatura;
     }
+
 }
