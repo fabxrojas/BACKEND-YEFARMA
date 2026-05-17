@@ -14,7 +14,7 @@ public class GuiaRemision {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id_guia;
 
-    @Column(name = "Codigo_guia", insertable = false, updatable = false)
+    @Column(name = "Codigo_guia", nullable = false, unique = true)
     private String codigoGuia;
 
     @ManyToOne
@@ -29,8 +29,17 @@ public class GuiaRemision {
     @JoinColumn(name = "id_estado")
     private EstadoRemision estado;
 
+    // 1. AGREGAR MOTIVO DE TRASLADO (Obligatorio para SUNAT)
+    @ManyToOne
+    @JoinColumn(name = "id_motivo", nullable = false)
+    private MotivoTraslado motivo;
+
     @Column(name = "punto_partida")
     private String puntoPartida;
+
+    // 2. AGREGAR PUNTO DE LLEGADA (Obligatorio para SUNAT)
+    @Column(name = "punto_llegada", nullable = false)
+    private String puntoLlegada;
 
     @Column(name = "placa_vehiculo")
     private String placaVehiculo;
@@ -38,16 +47,19 @@ public class GuiaRemision {
     @Column(name = "licencia_conductor")
     private String licenciaConductor;
 
-    @Column(name = "peso_bruto_total")
+    @Column(name = "peso_bruto_total", precision = 12, scale = 6)
     private BigDecimal pesoBrutoTotal;
 
     @Column(name = "FechaEmision")
     private LocalDate fechaEmision;
 
+    @Column(name = "FechaTraslado", nullable = false)
+    private LocalDate fechaTraslado;
+
     @Column(name = "FechaCreacion", insertable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 
-    @OneToMany(mappedBy = "guia", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "guia", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleGuia> detalles;
 
     public Integer getId_guia() {
@@ -90,12 +102,28 @@ public class GuiaRemision {
         this.estado = estado;
     }
 
+    public MotivoTraslado getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(MotivoTraslado motivo) {
+        this.motivo = motivo;
+    }
+
     public String getPuntoPartida() {
         return puntoPartida;
     }
 
     public void setPuntoPartida(String puntoPartida) {
         this.puntoPartida = puntoPartida;
+    }
+
+    public String getPuntoLlegada() {
+        return puntoLlegada;
+    }
+
+    public void setPuntoLlegada(String puntoLlegada) {
+        this.puntoLlegada = puntoLlegada;
     }
 
     public String getPlacaVehiculo() {
@@ -128,6 +156,14 @@ public class GuiaRemision {
 
     public void setFechaEmision(LocalDate fechaEmision) {
         this.fechaEmision = fechaEmision;
+    }
+
+    public LocalDate getFechaTraslado() {
+        return fechaTraslado;
+    }
+
+    public void setFechaTraslado(LocalDate fechaTraslado) {
+        this.fechaTraslado = fechaTraslado;
     }
 
     public LocalDateTime getFechaCreacion() {

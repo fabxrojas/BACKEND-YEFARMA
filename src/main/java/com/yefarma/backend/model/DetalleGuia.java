@@ -21,12 +21,10 @@ public class DetalleGuia {
     @JoinColumn(name = "id_producto", nullable = false)
     private Producto producto;
 
-    // NUEVA RELACIÓN: Unidad de Medida (NIU, KGM, etc.)
     @ManyToOne
     @JoinColumn(name = "id_unidad", nullable = false)
     private UnidadMedida unidadMedida;
 
-    // NUEVA RELACIÓN: Presentación (Caja, Frasco, etc.)
     @ManyToOne
     @JoinColumn(name = "id_presentacion", nullable = false)
     private Presentacion presentacion;

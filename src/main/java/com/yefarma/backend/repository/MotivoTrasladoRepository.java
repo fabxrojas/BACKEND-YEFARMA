@@ -1,9 +1,9 @@
 package com.yefarma.backend.repository;
 
-import com.yefarma.backend.model.ProductoMarca;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import com.yefarma.backend.model.MotivoTraslado;
 
 @Repository
-public interface ProductoMarcaRepository extends JpaRepository<ProductoMarca, Integer> {
+public interface MotivoTrasladoRepository extends JpaRepository<MotivoTraslado, Integer> {
 }

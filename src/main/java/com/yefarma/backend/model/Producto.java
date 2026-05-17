@@ -31,8 +31,7 @@ public class Producto {
     @Column(name = "RegistroSanitario")
     private String registroSanitario;
 
-    // NUEVO CAMPO: Necesario para el cálculo de Peso Bruto Total en la Guía
-    @Column(name = "peso_unitario")
+    @Column(name = "peso_unitario", precision = 12, scale = 5)
     private BigDecimal pesoUnitario;
 
     @Column(name = "FechaCreacion", insertable = false, updatable = false)
