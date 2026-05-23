@@ -13,7 +13,7 @@ public class Marca {
     private String nombre;
 
     @Column(name = "FechaCreacion", insertable = false, updatable = false) 
-    private LocalDateTime fechaCreacion; // Campo para almacenar la fecha de creación
+    private LocalDateTime fechaCreacion; 
 
     public Marca() {
     }

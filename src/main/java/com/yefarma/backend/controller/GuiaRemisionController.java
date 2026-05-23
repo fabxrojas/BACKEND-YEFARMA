@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-import com.yefarma.backend.repository.StockProveedorRepository;
 
 @RestController
 @RequestMapping("/api/guias-remision")
@@ -202,5 +201,15 @@ public class GuiaRemisionController {
         document.add(pTotal);
 
         document.close();
+    }
+
+    @PutMapping("/{id}/validar")
+    public ResponseEntity<?> validarGuia(@PathVariable("id") Integer id) {
+        try {
+            GuiaRemision guiaActualizada = guiaService.validarGuia(id);
+            return new ResponseEntity<>(guiaActualizada, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al validar la guía: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

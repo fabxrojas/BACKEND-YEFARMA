@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IngresoProductoRepository extends JpaRepository<IngresoProducto, Integer> {
-    // Spring Boot ya nos provee el método saveAll() para guardar listas completas
+
 }

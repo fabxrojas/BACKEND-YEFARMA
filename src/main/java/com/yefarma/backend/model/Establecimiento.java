@@ -1,9 +1,6 @@
 package com.yefarma.backend.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-
 @Entity
 @Table(name = "establecimiento")
 public class Establecimiento {

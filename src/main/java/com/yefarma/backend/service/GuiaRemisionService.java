@@ -2,6 +2,7 @@ package com.yefarma.backend.service;
 
 import com.yefarma.backend.model.DetalleGuia;
 import com.yefarma.backend.model.GuiaRemision;
+import com.yefarma.backend.model.IngresoProducto;
 import com.yefarma.backend.model.Producto;
 import com.yefarma.backend.model.StockProveedor;
 import com.yefarma.backend.repository.GuiaRemisionRepository;
@@ -27,8 +28,14 @@ public class GuiaRemisionService {
     @Autowired
     private StockProveedorRepository stockProveedorRepository;
 
+    @Autowired
+    private com.yefarma.backend.repository.EstadoRemisionRepository estadoRemisionRepository;
+    @Autowired
+    private com.yefarma.backend.repository.IngresoProductoRepository ingresoProductoRepository;
+
     @PersistenceContext
     private EntityManager entityManager;
+
     @Transactional
     public GuiaRemision guardarGuia(GuiaRemision guia) {
         BigDecimal pesoBrutoTotal = BigDecimal.ZERO;
@@ -113,13 +120,41 @@ public class GuiaRemisionService {
             throw e;
         }
     }
+
     public List<GuiaRemision> listarTodas() {
         return guiaRepository.findAll();
     }
+
     public GuiaRemision buscarPorId(Integer id) {
         return guiaRepository.findById(id).orElse(null);
     }
+
     public GuiaRemision buscarPorCodigo(String codigoGuia) {
         return guiaRepository.findByCodigoGuia(codigoGuia).orElse(null);
+    }
+
+    // VALIDACIÓN DE LA GUÍA DE REMISIÓN
+    @Transactional
+    public GuiaRemision validarGuia(Integer idGuia) {
+        // 1. Buscamos la guía de remisión por su ID
+        GuiaRemision guia = guiaRepository.findById(idGuia)
+                .orElseThrow(() -> new RuntimeException("Guía no encontrada con ID: " + idGuia));
+
+        // 2. Buscamos el estado "VALIDADO" en la base de datos usando EstadoRemision
+        com.yefarma.backend.model.EstadoRemision estadoValidado = estadoRemisionRepository.findByDescripcion("VALIDADO")
+                .orElseThrow(() -> new RuntimeException("El estado 'VALIDADO' no existe en la base de datos"));
+
+        // 3. Actualizamos el estado de la guía y guardamos los cambios
+        guia.setEstado(estadoValidado);
+
+        return guiaRepository.save(guia);
+    }
+
+    @Transactional
+    public IngresoProducto guardar(IngresoProducto ingreso) {
+        IngresoProducto guardado = ingresoProductoRepository.save(ingreso);
+        entityManager.flush();
+        entityManager.refresh(guardado);
+        return guardado;
     }
 }

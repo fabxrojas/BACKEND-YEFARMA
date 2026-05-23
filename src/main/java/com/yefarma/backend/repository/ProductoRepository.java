@@ -1,5 +1,6 @@
 package com.yefarma.backend.repository;
 
+import com.yefarma.backend.dto.InventarioDTO;
 import com.yefarma.backend.model.Marca;
 import com.yefarma.backend.model.Producto;
 

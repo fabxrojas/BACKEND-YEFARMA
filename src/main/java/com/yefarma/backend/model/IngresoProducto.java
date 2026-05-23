@@ -12,29 +12,29 @@ public class IngresoProducto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id_ingreso;
 
-    @ManyToOne 
+    @ManyToOne
     @JoinColumn(name = "id_producto")
     private Producto producto;
 
-    @ManyToOne 
+    @ManyToOne
     @JoinColumn(name = "id_marca")
     private Marca marca;
 
-    @ManyToOne 
+    @ManyToOne
     @JoinColumn(name = "id_proveedor")
-    private Proveedor proveedor; 
+    private Proveedor proveedor;
 
-    @ManyToOne 
+    @ManyToOne
     @JoinColumn(name = "id_presentacion")
     private Presentacion presentacion;
-    
-    @ManyToOne 
-    @JoinColumn(name = "id_usuario")
-    private Usuario usuario; 
 
-    @ManyToOne 
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
+
+    @ManyToOne
     @JoinColumn(name = "id_unidad")
-    private UnidadMedida unidad; 
+    private UnidadMedida unidad;
 
     @Column(name = "Cantidad_ingresada")
     private Integer cantidad_ingresada;
@@ -48,20 +48,20 @@ public class IngresoProducto {
     @Column(name = "FechaVencimiento")
     private LocalDate fechaVencimiento;
 
-    // --- CAMPOS GESTIONADOS POR MYSQL ---
     @Column(name = "Lote", insertable = false, updatable = false)
     private String lote;
 
     @Column(name = "cantidad_stock", insertable = false, updatable = false)
     private Integer cantidadStock;
 
-    @Column(name = "ingreso_activo", insertable = false, updatable = false)
+    @Column(name = "ingreso_activo", insertable = false)
     private Integer ingresoActivo;
 
     @Column(name = "FechaIngreso", insertable = false, updatable = false)
     private LocalDateTime fechaIngreso;
 
-    public IngresoProducto() {}
+    public IngresoProducto() {
+    }
 
     public Integer getId_ingreso() {
         return id_ingreso;
@@ -183,6 +183,4 @@ public class IngresoProducto {
         this.fechaIngreso = fechaIngreso;
     }
 
-    
-    
 }
