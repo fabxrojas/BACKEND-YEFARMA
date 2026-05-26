@@ -56,18 +56,21 @@ public class GuiaRemisionService {
         // Iteración de la mercadería agregada
         for (DetalleGuia detalle : guia.getDetalles()) {
             Producto productoBD = productoRepository.findById(detalle.getProducto().getId_producto())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Producto no encontrado ID: " + detalle.getProducto().getId_producto()));
+                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-            // Cálculo del peso subtotal (Peso Unitario x Cantidad Solicitada)
-            BigDecimal pesoSubtotal = productoBD.getPesoUnitario()
+            // 1. Calculamos el peso total en mg: Peso Unitario (mg) * Cantidad
+            BigDecimal pesoTotalMg = productoBD.getPesoUnitario()
                     .multiply(new BigDecimal(detalle.getCantidad()));
 
-            detalle.setPesoSubtotal(pesoSubtotal);
+            // 2. Convertimos a KG dividiendo entre 1,000,000
+            BigDecimal pesoSubtotalKg = pesoTotalMg.divide(new BigDecimal("1000000"), 6,
+                    java.math.RoundingMode.HALF_UP);
+
+            detalle.setPesoSubtotal(pesoSubtotalKg);
             detalle.setProducto(productoBD);
             detalle.setGuia(guia);
 
-            pesoBrutoTotal = pesoBrutoTotal.add(pesoSubtotal);
+            pesoBrutoTotal = pesoBrutoTotal.add(pesoSubtotalKg);
 
             // LÓGICA DE ACTUALIZACIÓN DE STOCK DEL PROVEEDOR
             // 1. Listar el catálogo completo del proveedor asignado en la transacción

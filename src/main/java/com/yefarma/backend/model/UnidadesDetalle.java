@@ -14,7 +14,6 @@ public class UnidadesDetalle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id_detalle;
 
-    // Relación con la tabla maestra de unidades de medida (Caja, Blister, Unidad, etc.)
     @ManyToOne
     @JoinColumn(name = "id_unidad", nullable = false)
     private UnidadMedida unidadMedida; 

@@ -1,13 +1,16 @@
 package com.yefarma.backend.controller;
 
+import com.yefarma.backend.dto.ProductoConStockDTO;
 import com.yefarma.backend.model.FormaFarmaceutica;
 import com.yefarma.backend.model.Producto;
 import com.yefarma.backend.model.TipoProducto;
+import com.yefarma.backend.model.UnidadMedida;
 import com.yefarma.backend.model.Marca;
 import com.yefarma.backend.model.Presentacion;
 import com.yefarma.backend.repository.FormaFarmaceuticaRepository;
 import com.yefarma.backend.repository.ProductoRepository;
 import com.yefarma.backend.repository.TipoProductoRepository;
+import com.yefarma.backend.repository.UnidadMedidaRepository;
 import com.yefarma.backend.repository.MarcaRepository;
 import com.yefarma.backend.repository.PresentacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,9 @@ public class ProductoController {
     @Autowired
     private PresentacionRepository presentacionRepository;
 
+    @Autowired
+    private UnidadMedidaRepository unidadMedidaRepository;
+
     // 1. Obtener todos los tipos (para el primer Dropdown)
     @GetMapping("/tipos")
     public List<TipoProducto> listarTipos() {
@@ -68,7 +74,9 @@ public class ProductoController {
     public ResponseEntity<Map<String, String>> registrarProducto(@RequestBody Producto producto) {
         Map<String, String> response = new HashMap<>();
         try {
+
             productoRepository.save(producto);
+
             response.put("status", "success");
             response.put("message", "Producto registrado correctamente");
             return ResponseEntity.ok(response);
@@ -92,6 +100,16 @@ public class ProductoController {
     @GetMapping("/listar")
     public List<Producto> listarTodos() {
         return productoRepository.findAll();
+    }
+
+    @GetMapping("/listar-con-stock")
+    public List<ProductoConStockDTO> listarConStock() {
+        return productoRepository.listarProductosConStock();
+    }
+
+    @GetMapping("/buscar-con-stock")
+    public List<ProductoConStockDTO> buscarConStock(@RequestParam String query) {
+        return productoRepository.buscarConStockPorNombre(query);
     }
 
     @DeleteMapping("/{id}")

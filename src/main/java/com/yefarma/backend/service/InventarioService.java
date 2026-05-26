@@ -3,6 +3,7 @@ package com.yefarma.backend.service;
 import com.yefarma.backend.dto.InventarioDTO;
 import com.yefarma.backend.model.BajaInventario;
 import com.yefarma.backend.model.IngresoProducto;
+import com.yefarma.backend.model.MotivoBaja;
 import com.yefarma.backend.model.Usuario;
 import com.yefarma.backend.repository.BajaInventarioRepository;
 import com.yefarma.backend.repository.IngresoProductoRepository;
@@ -28,8 +29,8 @@ public class InventarioService {
     @Autowired
     private BajaInventarioRepository bajaRepo;
 
-    @Transactional 
-    public void registrarBaja(Integer idIngreso, Integer idUsuario, String motivo) {
+    @Transactional
+    public void registrarBaja(Integer idIngreso, Integer idUsuario, Integer idMotivo, String detalle) {
 
         IngresoProducto ingreso = ingresoRepo.findById(idIngreso)
                 .orElseThrow(() -> new RuntimeException("Lote no encontrado"));
@@ -41,10 +42,15 @@ public class InventarioService {
         baja.setIngreso(ingreso);
 
         Usuario usuario = new Usuario();
-        usuario.setId_usuario(idUsuario); 
+        usuario.setIdUsuario(idUsuario);
         baja.setUsuario(usuario);
 
-        baja.setMotivo(motivo);
+        MotivoBaja motivo = new MotivoBaja();
+        motivo.setId_motivo(idMotivo);
+        baja.setMotivo(motivo); 
+
+        baja.setDetalle(detalle);
+
         bajaRepo.save(baja);
     }
 
@@ -52,15 +58,14 @@ public class InventarioService {
         return inventarioRepository.obtenerStockTotal().stream().map(obj -> {
             Object[] row = (Object[]) obj;
             return new InventarioDTO(
-                    (Integer) row[0], // idProducto
-                    (String) row[1], // nombreProducto
-                    (String) row[2], // codigo
-                    (String) row[3], // marca
-                    (String) row[4], // presentacion
-                    ((Number) row[5]).longValue(), // stockTotal
-                    (String) row[6], // LOTE
-                    (BigDecimal) row[7] // precioVenta
-            );
+                    (Integer) row[0],
+                    (String) row[1],
+                    (String) row[2],
+                    (String) row[3],
+                    (String) row[4],
+                    ((Number) row[5]).longValue(),
+                    (String) row[6],
+                    (BigDecimal) row[7]);
         }).collect(Collectors.toList());
     }
 }

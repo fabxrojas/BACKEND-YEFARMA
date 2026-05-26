@@ -19,17 +19,21 @@ public class BajaInventario {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(nullable = false)
-    private String motivo;
+    @ManyToOne
+    @JoinColumn(name = "id_motivo", nullable = false)
+    private MotivoBaja motivo;
+
+    @Column(length = 255)
+    private String detalle;
+
 
     @Column(name = "fecha_baja", insertable = false, updatable = false)
     private LocalDateTime fechaBaja;
 
-    // Constructores
     public BajaInventario() {
     }
 
-    // Getters y Setters
+
     public Integer getId_baja() {
         return id_baja;
     }
@@ -54,12 +58,20 @@ public class BajaInventario {
         this.usuario = usuario;
     }
 
-    public String getMotivo() {
+    public MotivoBaja getMotivo() {
         return motivo;
     }
 
-    public void setMotivo(String motivo) {
+    public void setMotivo(MotivoBaja motivo) {
         this.motivo = motivo;
+    }
+
+    public String getDetalle() {
+        return detalle;
+    }
+
+    public void setDetalle(String detalle) {
+        this.detalle = detalle;
     }
 
     public LocalDateTime getFechaBaja() {

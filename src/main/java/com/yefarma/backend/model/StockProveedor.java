@@ -26,7 +26,7 @@ public class StockProveedor {
     @Column(name = "cantidad_disponible", nullable = false)
     private Integer cantidadDisponible;
 
-    @Column(name = "precio_unitario", precision = 12, scale = 6)
+    @Column(name = "precio_unitario", precision = 12, scale = 4)
     private BigDecimal precioUnitario;
 
     // Constructores

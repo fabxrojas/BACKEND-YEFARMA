@@ -47,7 +47,7 @@ public class GuiaRemision {
     @Column(name = "licencia_conductor")
     private String licenciaConductor;
 
-    @Column(name = "peso_bruto_total", precision = 12, scale = 6)
+    @Column(name = "peso_bruto_total", precision = 12, scale = 5)
     private BigDecimal pesoBrutoTotal;
 
     @Column(name = "FechaEmision")

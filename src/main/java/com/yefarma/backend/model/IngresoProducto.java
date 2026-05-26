@@ -51,10 +51,10 @@ public class IngresoProducto {
     @Column(name = "Lote", insertable = false, updatable = false)
     private String lote;
 
-    @Column(name = "cantidad_stock", insertable = false, updatable = false)
+    @Column(name = "cantidad_stock", insertable = false)
     private Integer cantidadStock;
 
-    @Column(name = "ingreso_activo", insertable = false)
+    @Column(name = "ingreso_activo")
     private Integer ingresoActivo;
 
     @Column(name = "FechaIngreso", insertable = false, updatable = false)

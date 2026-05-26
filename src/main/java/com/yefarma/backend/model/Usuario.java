@@ -11,7 +11,7 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario") 
-    private Integer id_usuario;
+    private Integer idUsuario;
 
     @Column(name = "Nombre", nullable = false)
     private String nombre;
@@ -43,8 +43,8 @@ public class Usuario {
     @Column(name = "token_expiracion")
     private LocalDateTime tokenExpiracion;
 
-    public Integer getId_usuario() { return id_usuario; }
-    public void setId_usuario(Integer id_usuario) { this.id_usuario = id_usuario; }
+    public Integer getIdUsuario() { return idUsuario; }
+    public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }

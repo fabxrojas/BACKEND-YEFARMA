@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "productos")
 public class Producto {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_producto")
@@ -32,86 +33,39 @@ public class Producto {
     @Column(name = "RegistroSanitario")
     private String registroSanitario;
 
-    @Column(name = "peso_unitario", precision = 12, scale = 5)
+    @Column(name = "peso_unitario", precision = 12, scale = 2)
     private BigDecimal pesoUnitario;
 
     @Column(name = "FechaCreacion", insertable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 
-    public Producto() {
-    }
+    public Producto() {}
 
-    // Getters y Setters actualizados
-    public Integer getId_producto() {
-        return id_producto;
-    }
 
-    public void setId_producto(Integer id_producto) {
-        this.id_producto = id_producto;
-    }
+    public Integer getId_producto() { return id_producto; }
+    public void setId_producto(Integer id_producto) { this.id_producto = id_producto; }
 
-    public String getCodigo() {
-        return codigo;
-    }
+    public String getCodigo() { return codigo; }
+    public void setCodigo(String codigo) { this.codigo = codigo; }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
+    public String getProducto() { return producto; }
+    public void setProducto(String producto) { this.producto = producto; }
 
-    public String getProducto() {
-        return producto;
-    }
+    public TipoProducto getTipo() { return tipo; }
+    public void setTipo(TipoProducto tipo) { this.tipo = tipo; }
 
-    public void setProducto(String producto) {
-        this.producto = producto;
-    }
+    public FormaFarmaceutica getFormaFarmaceutica() { return formaFarmaceutica; }
+    public void setFormaFarmaceutica(FormaFarmaceutica formaFarmaceutica) { this.formaFarmaceutica = formaFarmaceutica; }
 
-    public TipoProducto getTipo() {
-        return tipo;
-    }
+    public BigDecimal getPrecio() { return precio; }
+    public void setPrecio(BigDecimal precio) { this.precio = precio; }
 
-    public void setTipo(TipoProducto tipo) {
-        this.tipo = tipo;
-    }
+    public String getRegistroSanitario() { return registroSanitario; }
+    public void setRegistroSanitario(String registroSanitario) { this.registroSanitario = registroSanitario; }
 
-    public FormaFarmaceutica getFormaFarmaceutica() {
-        return formaFarmaceutica;
-    }
+    public BigDecimal getPesoUnitario() { return pesoUnitario; }
+    public void setPesoUnitario(BigDecimal pesoUnitario) { this.pesoUnitario = pesoUnitario; }
 
-    public void setFormaFarmaceutica(FormaFarmaceutica formaFarmaceutica) {
-        this.formaFarmaceutica = formaFarmaceutica;
-    }
-
-    public BigDecimal getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(BigDecimal precio) {
-        this.precio = precio;
-    }
-
-    public String getRegistroSanitario() {
-        return registroSanitario;
-    }
-
-    public void setRegistroSanitario(String registroSanitario) {
-        this.registroSanitario = registroSanitario;
-    }
-
-    // Getter y Setter para el nuevo campo de peso
-    public BigDecimal getPesoUnitario() {
-        return pesoUnitario;
-    }
-
-    public void setPesoUnitario(BigDecimal pesoUnitario) {
-        this.pesoUnitario = pesoUnitario;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
+    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
+    public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
 }
