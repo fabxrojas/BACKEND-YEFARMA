@@ -55,8 +55,8 @@ public class IngresoProducto {
     private Integer cantidadStock;
 
     @Column(name = "ingreso_activo")
-    private Integer ingresoActivo;
-
+    private Integer ingresoActivo = 1;
+    
     @Column(name = "FechaIngreso", insertable = false, updatable = false)
     private LocalDateTime fechaIngreso;
 
