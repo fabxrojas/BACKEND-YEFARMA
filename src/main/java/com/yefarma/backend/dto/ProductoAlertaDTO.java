@@ -16,7 +16,6 @@ public class ProductoAlertaDTO {
     public String getProducto() { return producto; }
     public void setProducto(String producto) { this.producto = producto; }
     
-    // <--- GETTERS Y SETTERS TAMBIÉN A LONG
     public Long getStockActual() { return stockActual; }
     public void setStockActual(Long stockActual) { this.stockActual = stockActual; }
     
