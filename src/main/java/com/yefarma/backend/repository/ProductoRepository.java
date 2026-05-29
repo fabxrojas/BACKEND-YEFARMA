@@ -40,7 +40,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
         List<ProductoConStockDTO> buscarConStockPorNombre(@Param("nombre") String nombre);
 
         @Query("SELECT new com.yefarma.backend.dto.ProductoRankingDTO(p.producto, SUM(dd.cantidad)) " +
-                        "FROM DetalleDispensacion dd JOIN dd.producto p " + // <--- Aquí 'dd.producto' ya es válido
+                        "FROM DetalleDispensacion dd JOIN dd.producto p " +
                         "GROUP BY p.producto " +
                         "ORDER BY SUM(dd.cantidad) DESC")
         List<ProductoRankingDTO> obtenerTopProductos(Pageable pageable);
@@ -60,11 +60,13 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
                         +
                         "  ELSE CONCAT('Por Vencer en ', FUNCTION('DATEDIFF', i.fechaVencimiento, CURRENT_DATE), ' días') "
                         +
-                        "END) " +
+                        "END, " +
+                        "i.lote) " +
                         "FROM IngresoProducto i JOIN i.producto p " +
                         "WHERE FUNCTION('DATEDIFF', i.fechaVencimiento, CURRENT_DATE) <= 30 " +
-                        "AND i.cantidadStock > 0 " + // ¡Regla de negocio vital! Solo alertar si hay stock físico
-                        "GROUP BY p.producto, i.fechaVencimiento " +
+                        "AND i.cantidadStock > 0 " +
+                        "AND i.ingresoActivo = 1 " + 
+                        "GROUP BY p.producto, i.fechaVencimiento, i.lote " +
                         "ORDER BY i.fechaVencimiento ASC")
         List<ProductoAlertaDTO> obtenerProductosPorVencer();
 

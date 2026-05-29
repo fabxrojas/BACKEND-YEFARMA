@@ -22,10 +22,22 @@ public class UsuarioController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private com.yefarma.backend.service.UsuarioService usuarioService;
+
     // 1. LISTAR TODOS LOS USUARIOS
     @GetMapping("/listar")
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
+    }
+
+    @GetMapping("/perfil/{nombreUser}")
+    public ResponseEntity<?> obtenerPerfil(@PathVariable String nombreUser) {
+        try {
+            return ResponseEntity.ok(usuarioService.obtenerPerfil(nombreUser));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     // 2. CREAR USUARIO (Se mantiene tu lógica inicial)
@@ -82,7 +94,7 @@ public class UsuarioController {
             usuario.setResetToken(token);
             usuario.setTokenExpiracion(LocalDateTime.now().plusHours(2));
 
-            usuarioRepository.save(usuario); 
+            usuarioRepository.save(usuario);
             enviarEmail(usuario.getCorreo(), token);
 
             return ResponseEntity.ok("Enlace enviado.");

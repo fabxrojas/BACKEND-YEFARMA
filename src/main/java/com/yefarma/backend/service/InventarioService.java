@@ -47,25 +47,27 @@ public class InventarioService {
 
         MotivoBaja motivo = new MotivoBaja();
         motivo.setId_motivo(idMotivo);
-        baja.setMotivo(motivo); 
+        baja.setMotivo(motivo);
 
         baja.setDetalle(detalle);
 
         bajaRepo.save(baja);
     }
 
+    // En InventarioService.java
     public List<InventarioDTO> obtenerInventarioActual() {
-        return inventarioRepository.obtenerStockTotal().stream().map(obj -> {
-            Object[] row = (Object[]) obj;
+        return inventarioRepository.obtenerStockTotal().stream().map(row -> {
             return new InventarioDTO(
-                    (Integer) row[0],
-                    (String) row[1],
-                    (String) row[2],
-                    (String) row[3],
-                    (String) row[4],
-                    ((Number) row[5]).longValue(),
-                    (String) row[6],
-                    (BigDecimal) row[7]);
+                    (Integer) row[0], // id_ingreso (NUEVO)
+                    (Integer) row[1], // id_producto
+                    (String) row[2], // producto
+                    (String) row[3], // codigo
+                    (String) row[4], // marca
+                    (String) row[5], // presentacion
+                    ((Number) row[6]).longValue(), // stock
+                    (String) row[7], // lote
+                    (BigDecimal) row[8] // precio
+            );
         }).collect(Collectors.toList());
     }
 }

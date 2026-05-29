@@ -3,6 +3,7 @@ package com.yefarma.backend.dto;
 import java.math.BigDecimal;
 
 public record InventarioDTO(
+    Integer idIngreso,    
     Integer idProducto,
     String nombreProducto,
     String codigo,

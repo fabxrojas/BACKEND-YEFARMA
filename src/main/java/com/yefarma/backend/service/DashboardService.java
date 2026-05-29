@@ -1,7 +1,7 @@
 package com.yefarma.backend.service;
 
 import java.util.List;
-import java.util.stream.Collectors; // IMPORTANTE: Necesario para transformar las listas
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -14,44 +14,69 @@ import com.yefarma.backend.repository.ProductoRepository;
 
 @Service
 public class DashboardService {
-    @Autowired
-    private DispensacionRepository dispRepo;
-    @Autowired
-    private ProductoRepository prodRepo;
+        @Autowired
+        private DispensacionRepository dispRepo;
+        @Autowired
+        private ProductoRepository prodRepo;
 
-    public DashboardDTO getDashboardData() {
-        // 1. Instanciamos el DTO base con los KPIs que ya funcionaban perfectamente
-        DashboardDTO dashboard = new DashboardDTO(
-                dispRepo.obtenerVentasHoy() != null ? dispRepo.obtenerVentasHoy() : 0.0,
-                dispRepo.obtenerTotalDispensacionesHoy(),
-                prodRepo.countByStockBajo().size(),
-                prodRepo.obtenerTopProductos(PageRequest.of(0, 5)),
-                prodRepo.obtenerProductosPorVencer());
+        // 1. MÉTODO GLOBAL (Para administradores o vista general)
+        public DashboardDTO getDashboardData() {
+                DashboardDTO dashboard = new DashboardDTO(
+                                dispRepo.obtenerVentasHoy() != null ? dispRepo.obtenerVentasHoy() : 0.0,
+                                dispRepo.obtenerTotalDispensacionesHoy(),
+                                prodRepo.countByStockBajo().size(),
+                                prodRepo.obtenerTopProductos(PageRequest.of(0, 5)),
+                                prodRepo.obtenerProductosPorVencer());
 
-        // 2. Mapeamos la data del Gráfico: Últimos 7 Días
-        List<GraficoDTO> diarias = dispRepo.obtenerDispensacionesUltimos7Dias().stream()
-                .map(obj -> new GraficoDTO((String) obj[0], ((Number) obj[1]).doubleValue()))
-                .collect(Collectors.toList());
+                dashboard.setRendimientoPersonal(convertirAGrafico(dispRepo.obtenerRendimientoPersonalHoy()));
 
-        // 3. Mapeamos la data del Gráfico: Mensuales
-        List<GraficoDTO> mensuales = dispRepo.obtenerDispensacionesMensuales().stream()
-                .map(obj -> new GraficoDTO((String) obj[0], ((Number) obj[1]).doubleValue()))
-                .collect(Collectors.toList());
+                dashboard.setDispensacionesDiarias(convertirAGrafico(dispRepo.obtenerDispensacionesUltimos7Dias()));
+                dashboard.setDispensacionesMensuales(convertirAGrafico(dispRepo.obtenerDispensacionesMensuales()));
+                dashboard.setDispensacionesPorProveedor(
+                                convertirAGrafico(dispRepo.obtenerDispensacionesPorProveedor()));
 
-        // 4. Inyectamos las listas de gráficos al Dashboard final
-        List<GraficoDTO> proveedores = dispRepo.obtenerDispensacionesPorProveedor().stream()
-                .map(obj -> new GraficoDTO((String) obj[0], ((Number) obj[1]).doubleValue()))
-                .collect(Collectors.toList());
+                List<Object[]> dataRendimiento = dispRepo.obtenerRendimientoPersonalHoy();
+                dashboard.setRendimientoPersonal(convertirAGrafico(dataRendimiento));
 
-        // Inyectamos todas las listas al Dashboard final
-        dashboard.setDispensacionesDiarias(diarias);
-        dashboard.setDispensacionesMensuales(mensuales);
-        dashboard.setDispensacionesPorProveedor(proveedores); 
+                return dashboard;
+        }
 
-        return dashboard;
-    }
+        // 2. MÉTODO FILTRADO POR USUARIO (Para el Técnico Farmacéutico)
+        public DashboardDTO getDashboardDataPorUsuario(Integer idUsuario) {
+                DashboardDTO dashboard = new DashboardDTO(
+                                dispRepo.obtenerVentasHoyPorUsuario(idUsuario) != null
+                                                ? dispRepo.obtenerVentasHoyPorUsuario(idUsuario)
+                                                : 0.0,
+                                dispRepo.obtenerTotalDispensacionesHoyPorUsuario(idUsuario) != null
+                                                ? dispRepo.obtenerTotalDispensacionesHoyPorUsuario(idUsuario)
+                                                : 0L,
+                                prodRepo.countByStockBajo().size(), // Stock bajo suele ser global
+                                prodRepo.obtenerTopProductos(PageRequest.of(0, 5)),
+                                prodRepo.obtenerProductosPorVencer());
 
-    public List<com.yefarma.backend.dto.ProductoConStockDTO> obtenerProductosStockBajoDetalle() {
-        return prodRepo.obtenerDetalleStockBajo();
-    }
+                // Gráficos filtrados por ID de usuario
+                dashboard.setDispensacionesDiarias(
+                                convertirAGrafico(dispRepo.obtenerDispensacionesUltimos7DiasPorUsuario(idUsuario)));
+
+                dashboard.setDispensacionesMensuales(convertirAGrafico(dispRepo.obtenerDispensacionesMensuales()));
+                dashboard.setDispensacionesPorProveedor(
+                                convertirAGrafico(dispRepo.obtenerDispensacionesPorProveedor()));
+
+                List<Object[]> dataRendimiento = dispRepo.obtenerRendimientoPersonalHoy(); 
+                                                                                        
+                dashboard.setRendimientoPersonal(convertirAGrafico(dataRendimiento));
+
+                return dashboard;
+        }
+
+        // Método auxiliar para evitar repetir el stream().map().collect()
+        private List<GraficoDTO> convertirAGrafico(List<Object[]> resultados) {
+                return resultados.stream()
+                                .map(obj -> new GraficoDTO((String) obj[0], ((Number) obj[1]).doubleValue()))
+                                .collect(Collectors.toList());
+        }
+
+        public List<com.yefarma.backend.dto.ProductoConStockDTO> obtenerProductosStockBajoDetalle() {
+                return prodRepo.obtenerDetalleStockBajo();
+        }
 }

@@ -28,6 +28,7 @@ public class DispensacionService {
 
     @Transactional
     public Dispensacion procesarDispensacion(DispensacionRequest request) {
+        System.out.println("DEBUG: El ID de usuario recibido en el Service es: " + request.getIdUsuario());
         
         // Guardar la Boleta
         Dispensacion orden = new Dispensacion();
