@@ -162,14 +162,10 @@ public class GuiaRemisionController {
                 document.add(pLogistica);
                 document.add(new com.lowagie.text.Paragraph("\n"));
 
-                // 1. Cambiamos a 5 columnas
                 com.lowagie.text.pdf.PdfPTable productosTable = new com.lowagie.text.pdf.PdfPTable(5);
                 productosTable.setWidthPercentage(100);
-                // 2. Ajustamos los anchos: Producto(35), Detalle(25), Cant(10), Unidad(10),
-                // Peso(20)
                 productosTable.setWidths(new float[] { 35f, 25f, 10f, 10f, 20f });
 
-                // Configuración de la cabecera (5 columnas)
                 java.awt.Color colorCyanHeader = java.awt.Color.decode("#164e63");
                 String[] headers = { "Producto / Detalle", "Marca / Presentación", "Cantidad", "Unidad de medida",
                                 "Peso Subtotal" };

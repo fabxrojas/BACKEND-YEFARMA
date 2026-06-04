@@ -87,7 +87,7 @@ public class UsuarioController {
 
     @PostMapping("/recuperar-contrasena")
     public ResponseEntity<?> solicitarRecuperacion(@RequestBody Map<String, String> request) {
-        String correo = request.get("correo"); // Así extraes solo el email
+        String correo = request.get("correo");
 
         return usuarioRepository.findByCorreo(correo).map(usuario -> {
             String token = UUID.randomUUID().toString();
@@ -97,8 +97,8 @@ public class UsuarioController {
             usuarioRepository.save(usuario);
             enviarEmail(usuario.getCorreo(), token);
 
-            return ResponseEntity.ok("Enlace enviado.");
-        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Correo no encontrado"));
+            return ResponseEntity.ok(Map.of("message", "Enlace enviado correctamente"));
+        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Correo no registrado")));
     }
 
     @PostMapping("/cambiar-contrasena")
