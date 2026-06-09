@@ -25,6 +25,7 @@ public class UsuarioController {
     @Autowired
     private com.yefarma.backend.service.UsuarioService usuarioService;
 
+
     // 1. LISTAR TODOS LOS USUARIOS
     @GetMapping("/listar")
     public List<Usuario> listarUsuarios() {
@@ -56,7 +57,7 @@ public class UsuarioController {
                         .body("Este correo ya está registrado");
             }
             nuevoUsuario.setIdRol(2); // Rol de Técnico
-            nuevoUsuario.setNombreUser(null); // Para que el Trigger actúe
+            nuevoUsuario.setNombreUser(null); 
             Usuario guardado = usuarioRepository.save(nuevoUsuario);
             return ResponseEntity.ok(guardado);
         } catch (Exception e) {

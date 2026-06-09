@@ -27,15 +27,17 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
         @Query("SELECT new com.yefarma.backend.dto.ProductoConStockDTO(" +
                         "p.id_producto, p.producto, p.codigo, p.precio, SUM(COALESCE(i.cantidadStock, 0))) " +
                         "FROM Producto p " +
-                        "LEFT JOIN IngresoProducto i ON p.id_producto = i.producto.id_producto " +
+                        "JOIN IngresoProducto i ON p.id_producto = i.producto.id_producto " +
+                        "WHERE i.ingresoActivo = 1 " +
                         "GROUP BY p.id_producto, p.producto, p.codigo, p.precio")
         List<ProductoConStockDTO> listarProductosConStock();
 
         @Query("SELECT new com.yefarma.backend.dto.ProductoConStockDTO(" +
                         "p.id_producto, p.producto, p.codigo, p.precio, SUM(COALESCE(i.cantidadStock, 0))) " +
                         "FROM Producto p " +
-                        "LEFT JOIN IngresoProducto i ON p.id_producto = i.producto.id_producto " +
+                        "JOIN IngresoProducto i ON p.id_producto = i.producto.id_producto " +
                         "WHERE LOWER(p.producto) LIKE LOWER(CONCAT('%', :nombre, '%')) " +
+                        "AND i.ingresoActivo = 1 " +
                         "GROUP BY p.id_producto, p.producto, p.codigo, p.precio")
         List<ProductoConStockDTO> buscarConStockPorNombre(@Param("nombre") String nombre);
 
@@ -45,9 +47,11 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
                         "ORDER BY SUM(dd.cantidad) DESC")
         List<ProductoRankingDTO> obtenerTopProductos(Pageable pageable);
 
-        @Query("SELECT COUNT(p) FROM Producto p LEFT JOIN IngresoProducto i ON p.id_producto = i.producto.id_producto "
-                        +
-                        "GROUP BY p.id_producto HAVING SUM(COALESCE(i.cantidadStock, 0)) < 10")
+        @Query("SELECT COUNT(p) FROM Producto p " +
+                        "JOIN IngresoProducto i ON p.id_producto = i.producto.id_producto " +
+                        "WHERE i.ingresoActivo = 1 " +
+                        "GROUP BY p.id_producto " +
+                        "HAVING SUM(COALESCE(i.cantidadStock, 0)) < 10")
         List<Integer> countByStockBajo();
 
         @Query("SELECT new com.yefarma.backend.dto.ProductoAlertaDTO(" +
@@ -65,7 +69,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
                         "FROM IngresoProducto i JOIN i.producto p " +
                         "WHERE FUNCTION('DATEDIFF', i.fechaVencimiento, CURRENT_DATE) <= 30 " +
                         "AND i.cantidadStock > 0 " +
-                        "AND i.ingresoActivo = 1 " + 
+                        "AND i.ingresoActivo = 1 " +
                         "GROUP BY p.producto, i.fechaVencimiento, i.lote " +
                         "ORDER BY i.fechaVencimiento ASC")
         List<ProductoAlertaDTO> obtenerProductosPorVencer();
@@ -73,7 +77,8 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
         @Query("SELECT new com.yefarma.backend.dto.ProductoConStockDTO(" +
                         "p.id_producto, p.producto, p.codigo, p.precio, SUM(COALESCE(i.cantidadStock, 0))) " +
                         "FROM Producto p " +
-                        "LEFT JOIN IngresoProducto i ON p.id_producto = i.producto.id_producto " +
+                        "JOIN IngresoProducto i ON p.id_producto = i.producto.id_producto " +
+                        "WHERE i.ingresoActivo = 1 " +
                         "GROUP BY p.id_producto, p.producto, p.codigo, p.precio " +
                         "HAVING SUM(COALESCE(i.cantidadStock, 0)) < 10")
         List<ProductoConStockDTO> obtenerDetalleStockBajo();

@@ -43,6 +43,12 @@ public class Usuario {
     @Column(name = "token_expiracion")
     private LocalDateTime tokenExpiracion;
 
+    @Column(name = "codigo_2fa")
+    private String codigo2FA;
+
+    @Column(name = "codigo_2fa_expiracion")
+    private LocalDateTime codigo2FAExpiracion;
+
     public Integer getIdUsuario() { return idUsuario; }
     public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
 
@@ -85,4 +91,10 @@ public class Usuario {
     public void setTokenExpiracion(LocalDateTime tokenExpiracion) {
         this.tokenExpiracion = tokenExpiracion;
     }
+
+    public String getCodigo2FA() { return codigo2FA; }
+    public void setCodigo2FA(String codigo2FA) { this.codigo2FA = codigo2FA; }
+
+    public LocalDateTime getCodigo2FAExpiracion() { return codigo2FAExpiracion; }
+    public void setCodigo2FAExpiracion(LocalDateTime codigo2FAExpiracion) { this.codigo2FAExpiracion = codigo2FAExpiracion; }
 }
