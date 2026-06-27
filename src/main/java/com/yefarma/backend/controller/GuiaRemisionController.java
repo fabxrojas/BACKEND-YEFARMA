@@ -5,11 +5,14 @@ import com.yefarma.backend.model.GuiaRemision;
 import com.yefarma.backend.service.GuiaRemisionService;
 
 import jakarta.servlet.http.HttpServletResponse;
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -17,223 +20,244 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 public class GuiaRemisionController {
 
-        @Autowired
-        private GuiaRemisionService guiaService;
+    @Autowired
+    private GuiaRemisionService guiaService;
 
-        @PostMapping
-        public ResponseEntity<?> crearGuia(@RequestBody GuiaRemision guia) {
-                try {
-                        if (guia.getMotivo() == null || guia.getFechaTraslado() == null) {
-                                return new ResponseEntity<>("Error: El motivo y la fecha de traslado son obligatorios.",
-                                                HttpStatus.BAD_REQUEST);
-                        }
+    @GetMapping
+    public List<GuiaRemision> listar() {
+        return guiaService.listarTodas();
+    }
 
-                        GuiaRemision nuevaGuia = guiaService.guardarGuia(guia);
-                        return new ResponseEntity<>(nuevaGuia, HttpStatus.CREATED);
-                } catch (Exception e) {
-                        e.printStackTrace();
-                        return new ResponseEntity<>("Error al crear la guía: " + e.getMessage(),
-                                        HttpStatus.INTERNAL_SERVER_ERROR);
-                }
+    @PostMapping
+    public ResponseEntity<?> crearGuia(@RequestBody GuiaRemision guia) {
+        try {
+            if (guia.getCliente() == null) {
+                return new ResponseEntity<>("Error: El cliente es obligatorio para la salida.", HttpStatus.BAD_REQUEST);
+            }
+            if (guia.getMotivo() == null || guia.getFechaTraslado() == null) {
+                return new ResponseEntity<>("Error: El motivo y la fecha de traslado son obligatorios.", HttpStatus.BAD_REQUEST);
+            }
+
+            GuiaRemision nuevaGuia = guiaService.guardarGuia(guia);
+            return new ResponseEntity<>(nuevaGuia, HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Error al crear la guía: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/codigo/{codigo}")
+    public ResponseEntity<?> buscarPorCodigo(@PathVariable String codigo) {
+        GuiaRemision guia = guiaService.buscarPorCodigo(codigo);
+        return (guia != null) ? ResponseEntity.ok(guia) : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @PutMapping("/{id}/validar")
+    public ResponseEntity<?> validarGuia(@PathVariable("id") Integer id) {
+        try {
+            GuiaRemision guiaActualizada = guiaService.validarGuia(id);
+            return new ResponseEntity<>(guiaActualizada, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/{id}/anular")
+    public ResponseEntity<?> anularGuia(@PathVariable("id") Integer id) {
+        try {
+            GuiaRemision guiaActualizada = guiaService.anularGuia(id);
+            return new ResponseEntity<>(guiaActualizada, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // =======================================================
+    // GENERACIÓN DE PDF - DISEÑO OFICIAL SUNAT (CAJAS)
+    // =======================================================
+    @GetMapping("/pdf/{id}")
+    public void generarPdf(@PathVariable Integer id, HttpServletResponse response) throws Exception {
+        GuiaRemision guia = guiaService.buscarPorId(id);
+        if (guia == null) return;
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=Guia_Remision_" + guia.getCodigoGuia() + ".pdf");
+        
+        // Márgenes estrechos para aprovechar la hoja como un formulario real
+        Document document = new Document(PageSize.A4, 30, 30, 30, 30);
+        PdfWriter.getInstance(document, response.getOutputStream());
+        document.open();
+
+        // Tipografías
+        Font fontTituloEmpresa = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
+        Font fontTituloCaja = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14);
+        Font fontBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9);
+        Font fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 9);
+        Font fontChica = FontFactory.getFont(FontFactory.HELVETICA, 8);
+
+        // --------------------------------------------------------
+        // 1. CABECERA (LOGO/EMPRESA IZQUIERDA - CAJA RUC DERECHA)
+        // --------------------------------------------------------
+        PdfPTable tableHeader = new PdfPTable(3);
+        tableHeader.setWidthPercentage(100);
+        tableHeader.setWidths(new float[]{5f, 0.5f, 4f}); // Proporciones
+
+        // Columna Izquierda: Datos del Remitente
+        PdfPCell cellRemitente = new PdfPCell();
+        cellRemitente.setBorder(Rectangle.NO_BORDER);
+        cellRemitente.addElement(new Paragraph("YEFARMA S.A.C.", fontTituloEmpresa));
+        cellRemitente.addElement(new Paragraph("Av. Sta. Rosa 1580, Puente Piedra - Lima", fontNormal));
+        cellRemitente.addElement(new Paragraph("Almacén y Distribución Farmacéutica", fontChica));
+        tableHeader.addCell(cellRemitente);
+
+        // Columna Central: Espacio en blanco
+        PdfPCell cellEspacio = new PdfPCell(new Phrase(""));
+        cellEspacio.setBorder(Rectangle.NO_BORDER);
+        tableHeader.addCell(cellEspacio);
+
+        // Columna Derecha: CAJA DE RUC Y SERIE (Construida con tabla anidada)
+        PdfPTable tableRucCaja = new PdfPTable(1);
+        PdfPCell cellRucInterior = new PdfPCell();
+        cellRucInterior.setBorderWidth(1.5f); // Borde grueso
+        cellRucInterior.setPaddingTop(10f);
+        cellRucInterior.setPaddingBottom(15f);
+        
+        Paragraph pRuc = new Paragraph("R.U.C. 20784512369", fontTituloCaja);
+        pRuc.setAlignment(Element.ALIGN_CENTER);
+        Paragraph pTitulo = new Paragraph("GUÍA DE REMISIÓN\nREMITENTE", fontTituloCaja);
+        pTitulo.setAlignment(Element.ALIGN_CENTER);
+        Paragraph pNumero = new Paragraph("N° " + guia.getCodigoGuia(), fontTituloCaja);
+        pNumero.setAlignment(Element.ALIGN_CENTER);
+        
+        cellRucInterior.addElement(pRuc);
+        cellRucInterior.addElement(new Paragraph("\n"));
+        cellRucInterior.addElement(pTitulo);
+        cellRucInterior.addElement(new Paragraph("\n"));
+        cellRucInterior.addElement(pNumero);
+        
+        tableRucCaja.addCell(cellRucInterior);
+        
+        PdfPCell cellContenedorRuc = new PdfPCell(tableRucCaja);
+        cellContenedorRuc.setBorder(Rectangle.NO_BORDER);
+        tableHeader.addCell(cellContenedorRuc);
+
+        document.add(tableHeader);
+        document.add(new Paragraph("\n"));
+
+        // --------------------------------------------------------
+        // 2. CAJA DE DATOS DE TRASLADO Y DESTINATARIO
+        // --------------------------------------------------------
+        PdfPTable tableInfoBox = new PdfPTable(1);
+        tableInfoBox.setWidthPercentage(100);
+        
+        PdfPTable tableInfoInterna = new PdfPTable(2);
+        tableInfoInterna.setWidths(new float[]{5f, 5f});
+        
+        PdfPCell cellIzq = new PdfPCell();
+        cellIzq.setBorder(Rectangle.NO_BORDER);
+        cellIzq.addElement(new Paragraph("Fecha de inicio del traslado: " + guia.getFechaTraslado(), fontNormal));
+        cellIzq.addElement(new Paragraph("Destinatario: " + (guia.getCliente() != null ? guia.getCliente().getNombre() : ""), fontNormal));
+        cellIzq.addElement(new Paragraph("RUC / DNI: " + (guia.getCliente() != null ? guia.getCliente().getRuc() : ""), fontNormal));
+        
+        PdfPCell cellDer = new PdfPCell();
+        cellDer.setBorder(Rectangle.NO_BORDER);
+        cellDer.addElement(new Paragraph("Punto de partida: " + guia.getPuntoPartida(), fontNormal));
+        cellDer.addElement(new Paragraph("Punto de llegada: " + guia.getPuntoLlegada(), fontNormal));
+
+        tableInfoInterna.addCell(cellIzq);
+        tableInfoInterna.addCell(cellDer);
+        
+        PdfPCell cellBoxExterior = new PdfPCell(tableInfoInterna);
+        cellBoxExterior.setPadding(8f);
+        cellBoxExterior.setBorderWidth(1f);
+        tableInfoBox.addCell(cellBoxExterior);
+        document.add(tableInfoBox);
+
+        // --------------------------------------------------------
+        // 3. CAJA MOTIVO DE TRASLADO
+        // --------------------------------------------------------
+        PdfPTable tableMotivoBox = new PdfPTable(1);
+        tableMotivoBox.setWidthPercentage(100);
+        PdfPCell cellMotivo = new PdfPCell();
+        cellMotivo.setPadding(6f);
+        cellMotivo.setBorderWidthTop(0); // Se pega a la caja de arriba
+        cellMotivo.addElement(new Paragraph("Motivo de Traslado:   [ X ]  " + (guia.getMotivo() != null ? guia.getMotivo().getNombre() : ""), fontBold));
+        tableMotivoBox.addCell(cellMotivo);
+        document.add(tableMotivoBox);
+        document.add(new Paragraph("\n"));
+
+        // --------------------------------------------------------
+        // 4. TABLA DE BIENES TRANSPORTADOS
+        // --------------------------------------------------------
+        PdfPTable tableBienes = new PdfPTable(5);
+        tableBienes.setWidthPercentage(100);
+        tableBienes.setWidths(new float[]{0.8f, 5f, 1.2f, 1.5f, 1.5f}); // Anchos de columnas
+
+        // Cabeceras de la tabla
+        String[] cabeceras = {"Item", "Descripción del bien transportado", "Cant.", "Unid. Medida", "Peso Total"};
+        for (String cabecera : cabeceras) {
+            PdfPCell c = new PdfPCell(new Phrase(cabecera, fontBold));
+            c.setHorizontalAlignment(Element.ALIGN_CENTER);
+            c.setBackgroundColor(new java.awt.Color(235, 235, 235));
+            c.setPadding(5f);
+            tableBienes.addCell(c);
         }
 
-        @GetMapping
-        public List<GuiaRemision> listarGuias() {
-                return guiaService.listarTodas();
+        // Listar Productos
+        int itemNum = 1;
+        for (DetalleGuia d : guia.getDetalles()) {
+            PdfPCell cNum = new PdfPCell(new Phrase(String.valueOf(itemNum++), fontNormal));
+            cNum.setHorizontalAlignment(Element.ALIGN_CENTER);
+            tableBienes.addCell(cNum);
+
+            String descripcionCompleta = d.getProducto().getProducto() + 
+                                       " (" + d.getMarcaSolicitada() + ") " + 
+                                       (d.getPresentacion() != null ? d.getPresentacion().getNombre() : "");
+            tableBienes.addCell(new Phrase(descripcionCompleta, fontNormal));
+
+            PdfPCell cCant = new PdfPCell(new Phrase(String.valueOf(d.getCantidad()), fontNormal));
+            cCant.setHorizontalAlignment(Element.ALIGN_CENTER);
+            tableBienes.addCell(cCant);
+
+            PdfPCell cUnd = new PdfPCell(new Phrase(d.getUnidadMedida() != null ? d.getUnidadMedida().getAbreviatura() : "", fontNormal));
+            cUnd.setHorizontalAlignment(Element.ALIGN_CENTER);
+            tableBienes.addCell(cUnd);
+
+            PdfPCell cPeso = new PdfPCell(new Phrase(d.getPesoSubtotal() + " kg", fontNormal));
+            cPeso.setHorizontalAlignment(Element.ALIGN_CENTER);
+            tableBienes.addCell(cPeso);
         }
+        document.add(tableBienes);
+        document.add(new Paragraph("\n"));
 
-        @GetMapping("/buscar/{codigo}")
-        public ResponseEntity<?> buscarPorCodigo(@PathVariable("codigo") String codigo) {
-                GuiaRemision guia = guiaService.buscarPorCodigo(codigo);
-                if (guia == null) {
-                        return new ResponseEntity<>("No se encontró ninguna guía con el código especificado.",
-                                        HttpStatus.NOT_FOUND);
-                }
-                return new ResponseEntity<>(guia, HttpStatus.OK);
-        }
+        // --------------------------------------------------------
+        // 5. CAJAS INFERIORES: TRANSPORTISTA, CONDUCTOR Y PESO
+        // --------------------------------------------------------
+        PdfPTable tableFooter = new PdfPTable(2);
+        tableFooter.setWidthPercentage(100);
+        tableFooter.setWidths(new float[]{6.5f, 3.5f});
 
-        @GetMapping("/{id}/pdf")
-        public void generarReportePDF(@PathVariable("id") Integer id, HttpServletResponse response) throws Exception {
-                // 1. Recuperar los datos de la guía e hijos desde la base de datos
-                GuiaRemision guia = guiaService.buscarPorId(id);
-                if (guia == null) {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        return;
-                }
+        // Caja Izquierda: Vehículo y Conductor
+        PdfPCell cTranspInfo = new PdfPCell();
+        cTranspInfo.setPadding(8f);
+        cTranspInfo.addElement(new Paragraph("Datos de la Unidad de Transporte y Conductor", fontBold));
+        cTranspInfo.addElement(new Paragraph("Marca y Placa del Vehículo: " + (guia.getPlacaVehiculo() != null && !guia.getPlacaVehiculo().isEmpty() ? guia.getPlacaVehiculo() : "NO APLICA"), fontNormal));
+        cTranspInfo.addElement(new Paragraph("Licencia de Conducir: " + (guia.getLicenciaConductor() != null && !guia.getLicenciaConductor().isEmpty() ? guia.getLicenciaConductor() : "NO APLICA"), fontNormal));
+        tableFooter.addCell(cTranspInfo);
 
-                // 2. Configurar cabeceras HTTP de transmisión de archivos adjuntos (Attachment)
-                response.setContentType("application/pdf");
-                String headerKey = "Content-Disposition";
-                String headerValue = "attachment; filename=Guia_" + guia.getCodigoGuia() + ".pdf";
-                response.setHeader(headerKey, headerValue);
+        // Caja Derecha: Peso Total Bruto
+        PdfPCell cPesoTotal = new PdfPCell();
+        cPesoTotal.setPadding(8f);
+        cPesoTotal.addElement(new Paragraph("Peso Bruto Total", fontBold));
+        
+        Paragraph pKilos = new Paragraph(guia.getPesoBrutoTotal() + " KGM", fontTituloEmpresa);
+        pKilos.setAlignment(Element.ALIGN_CENTER);
+        cPesoTotal.addElement(new Paragraph("\n"));
+        cPesoTotal.addElement(pKilos);
+        
+        tableFooter.addCell(cPesoTotal);
 
-                // 3. Inicializar el lienzo del documento PDF en tamaño A4 con márgenes
-                // uniformes
-                com.lowagie.text.Document document = new com.lowagie.text.Document(com.lowagie.text.PageSize.A4, 36, 36,
-                                36,
-                                36);
-                com.lowagie.text.pdf.PdfWriter.getInstance(document, response.getOutputStream());
-
-                document.open();
-
-                // 4. Paleta de colores institucionales de Yefarma y tipografías
-                com.lowagie.text.Font fontTitulo = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 16,
-                                com.lowagie.text.Font.BOLD, java.awt.Color.decode("#164e63"));
-                com.lowagie.text.Font fontSub = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 10,
-                                com.lowagie.text.Font.NORMAL, java.awt.Color.GRAY);
-                com.lowagie.text.Font fontSeccion = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 11,
-                                com.lowagie.text.Font.BOLD, java.awt.Color.decode("#0f766e"));
-                com.lowagie.text.Font fontTexto = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 9,
-                                com.lowagie.text.Font.NORMAL);
-                com.lowagie.text.Font fontTh = new com.lowagie.text.Font(com.lowagie.text.Font.HELVETICA, 9,
-                                com.lowagie.text.Font.BOLD, java.awt.Color.WHITE);
-
-                // 5. CABECERA: Maquetación en dos columnas (Datos de Yefarma vs Recuadro SUNAT)
-                com.lowagie.text.pdf.PdfPTable headerTable = new com.lowagie.text.pdf.PdfPTable(2);
-                headerTable.setWidthPercentage(100);
-                headerTable.setWidths(new float[] { 60f, 40f });
-
-                // Lado Izquierdo: Datos de la Empresa
-                com.lowagie.text.pdf.PdfPCell celdaIzq = new com.lowagie.text.pdf.PdfPCell();
-                celdaIzq.setBorder(com.lowagie.text.Rectangle.NO_BORDER);
-                celdaIzq.addElement(new com.lowagie.text.Paragraph("YEFARMA S.A.C.", fontTitulo));
-                celdaIzq.addElement(
-                                new com.lowagie.text.Paragraph("Soluciones Farmacéuticas y Almacenamiento", fontSub));
-                celdaIzq.addElement(
-                                new com.lowagie.text.Paragraph("Dirección: 1580 Av. Sta. Rosa - Puente Piedra, Lima",
-                                                fontTexto));
-                headerTable.addCell(celdaIzq);
-
-                // Lado Derecho: Recuadro oficial del comprobante
-                com.lowagie.text.pdf.PdfPCell celdaDer = new com.lowagie.text.pdf.PdfPCell();
-                celdaDer.setBorderColor(java.awt.Color.decode("#0f766e"));
-                celdaDer.setBorderWidth(2f);
-                celdaDer.setPadding(10f);
-
-                com.lowagie.text.Paragraph pRuc = new com.lowagie.text.Paragraph("RUC: 20784512369", fontSeccion);
-                pRuc.setAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-                com.lowagie.text.Paragraph pTipo = new com.lowagie.text.Paragraph("GUÍA DE REMISIÓN REMITENTE",
-                                fontTexto);
-                pTipo.setAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-                com.lowagie.text.Paragraph pCodigo = new com.lowagie.text.Paragraph(guia.getCodigoGuia(), fontTitulo);
-                pCodigo.setAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-
-                celdaDer.addElement(pRuc);
-                celdaDer.addElement(pTipo);
-                celdaDer.addElement(pCodigo);
-                headerTable.addCell(celdaDer);
-
-                document.add(headerTable);
-                document.add(new com.lowagie.text.Paragraph("\n"));
-
-                // 6. BLOQUE DE TRAZABILIDAD: Direcciones Logísticas
-                com.lowagie.text.pdf.PdfPTable infoTable = new com.lowagie.text.pdf.PdfPTable(2);
-                infoTable.setWidthPercentage(100);
-
-                infoTable.addCell(new com.lowagie.text.pdf.PdfPCell(
-                                new com.lowagie.text.Paragraph("PUNTO DE PARTIDA (PROVEEDOR):", fontSeccion)));
-                infoTable.addCell(new com.lowagie.text.pdf.PdfPCell(
-                                new com.lowagie.text.Paragraph("PUNTO DE LLEGADA (ESTABLECIMIENTO):", fontSeccion)));
-
-                infoTable.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Paragraph(
-                                guia.getProveedor().getNombre() + "\n" + guia.getPuntoPartida(), fontTexto)));
-                infoTable.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Paragraph(
-                                guia.getEstablecimiento().getNombreComercial() + "\n" + guia.getPuntoLlegada(),
-                                fontTexto)));
-
-                document.add(infoTable);
-                document.add(new com.lowagie.text.Paragraph("\n"));
-
-                // 7. BLOQUE METADATOS: Vehículo, Licencia y Fechas
-                com.lowagie.text.Paragraph pLogistica = new com.lowagie.text.Paragraph(
-                                "Motivo Traslado: " + guia.getMotivo().getNombre() + "  |  " +
-                                                "Placa Vehículo: "
-                                                + (guia.getPlacaVehiculo() != null
-                                                                ? guia.getPlacaVehiculo().toUpperCase()
-                                                                : "N/A")
-                                                + "  |  " +
-                                                "Licencia Conductor: "
-                                                + (guia.getLicenciaConductor() != null
-                                                                ? guia.getLicenciaConductor().toUpperCase()
-                                                                : "N/A")
-                                                + "  |  " +
-                                                "Fecha Traslado: " + guia.getFechaTraslado(),
-                                fontTexto);
-                document.add(pLogistica);
-                document.add(new com.lowagie.text.Paragraph("\n"));
-
-                com.lowagie.text.pdf.PdfPTable productosTable = new com.lowagie.text.pdf.PdfPTable(5);
-                productosTable.setWidthPercentage(100);
-                productosTable.setWidths(new float[] { 35f, 25f, 10f, 10f, 20f });
-
-                java.awt.Color colorCyanHeader = java.awt.Color.decode("#164e63");
-                String[] headers = { "Producto / Detalle", "Marca / Presentación", "Cantidad", "Unidad de medida",
-                                "Peso Subtotal" };
-                for (String h : headers) {
-                        com.lowagie.text.pdf.PdfPCell th = new com.lowagie.text.pdf.PdfPCell(
-                                        new com.lowagie.text.Paragraph(h, fontTh));
-                        th.setBackgroundColor(colorCyanHeader);
-                        th.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-                        th.setPadding(6f);
-                        productosTable.addCell(th);
-                }
-
-                // Carga dinámica de los ítems de mercadería
-                for (DetalleGuia detalle : guia.getDetalles()) {
-                        // Col 1: Producto
-                        productosTable.addCell(new com.lowagie.text.pdf.PdfPCell(
-                                        new com.lowagie.text.Paragraph(detalle.getProducto().getProducto(),
-                                                        fontTexto)));
-
-                        // Col 2: Marca / Presentación
-                        String presentacionTexto = (detalle.getPresentacion() != null)
-                                        ? detalle.getPresentacion().getNombre()
-                                        : "N/A";
-                        productosTable.addCell(new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Paragraph(
-                                        detalle.getMarcaSolicitada() + " / " + presentacionTexto, fontTexto)));
-
-                        // Col 3: Cantidad
-                        com.lowagie.text.pdf.PdfPCell cCant = new com.lowagie.text.pdf.PdfPCell(
-                                        new com.lowagie.text.Paragraph(String.valueOf(detalle.getCantidad()),
-                                                        fontTexto));
-                        cCant.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-                        productosTable.addCell(cCant);
-
-                        // Col 4: Unidad (Nueva columna)
-                        String unidad = (detalle.getUnidadMedida() != null) ? detalle.getUnidadMedida().getAbreviatura()
-                                        : "N/A";
-                        com.lowagie.text.pdf.PdfPCell cUnidad = new com.lowagie.text.pdf.PdfPCell(
-                                        new com.lowagie.text.Paragraph(unidad, fontTexto));
-                        cUnidad.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_CENTER);
-                        productosTable.addCell(cUnidad);
-
-                        // Col 5: Peso
-                        com.lowagie.text.pdf.PdfPCell cPeso = new com.lowagie.text.pdf.PdfPCell(
-                                        new com.lowagie.text.Paragraph(detalle.getPesoSubtotal() + " kg", fontTexto));
-                        cPeso.setHorizontalAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
-                        productosTable.addCell(cPeso);
-                }
-
-                document.add(productosTable);
-                document.add(new com.lowagie.text.Paragraph("\n"));
-
-                // 9. RESUMEN: Cierre con pesos totales consolidados
-                com.lowagie.text.Paragraph pTotal = new com.lowagie.text.Paragraph(
-                                "PESO BRUTO TOTAL CONSOLIDADO: " + guia.getPesoBrutoTotal() + " KG", fontSeccion);
-                pTotal.setAlignment(com.lowagie.text.Element.ALIGN_RIGHT);
-                document.add(pTotal);
-
-                document.close();
-        }
-
-        @PutMapping("/{id}/validar")
-        public ResponseEntity<?> validarGuia(@PathVariable("id") Integer id) {
-                try {
-                        GuiaRemision guiaActualizada = guiaService.validarGuia(id);
-                        return new ResponseEntity<>(guiaActualizada, HttpStatus.OK);
-                } catch (Exception e) {
-                        return new ResponseEntity<>("Error al validar la guía: " + e.getMessage(),
-                                        HttpStatus.INTERNAL_SERVER_ERROR);
-                }
-        }
+        document.add(tableFooter);
+        document.close();
+    }
 }

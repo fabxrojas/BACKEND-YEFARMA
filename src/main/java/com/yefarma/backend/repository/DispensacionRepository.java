@@ -17,11 +17,20 @@ public interface DispensacionRepository extends JpaRepository<Dispensacion, Inte
         @Query("SELECT COUNT(d) FROM Dispensacion d WHERE DATE(d.fechaHora) = CURRENT_DATE")
         Long obtenerTotalDispensacionesHoy();
 
-        @Query("SELECT SUM(d.total) FROM Dispensacion d WHERE DATE(d.fechaHora) = CURRENT_DATE AND d.idUsuario = :idUsuario")
+        @Query("SELECT COALESCE(SUM(d.total), 0) FROM Dispensacion d WHERE DATE(d.fechaHora) = CURRENT_DATE AND d.idUsuario = :idUsuario")
         Double obtenerVentasHoyPorUsuario(@Param("idUsuario") Integer idUsuario);
 
         @Query("SELECT COUNT(d) FROM Dispensacion d WHERE DATE(d.fechaHora) = CURRENT_DATE AND d.idUsuario = :idUsuario")
         Long obtenerTotalDispensacionesHoyPorUsuario(@Param("idUsuario") Integer idUsuario);
+
+        @Query("SELECT COUNT(d) FROM Dispensacion d WHERE DATE(d.fechaHora) = CURRENT_DATE AND d.idUsuario = :idUsuario")
+        Integer obtenerTicketsHoyPorUsuario(@Param("idUsuario") Integer idUsuario);
+
+        @Query("SELECT COALESCE(SUM(d.total), 0) FROM Dispensacion d WHERE DATE(d.fechaHora) = CURRENT_DATE")
+        Double obtenerTotalVentasHoyGlobal();
+
+        @Query("SELECT COUNT(d) FROM Dispensacion d WHERE DATE(d.fechaHora) = CURRENT_DATE")
+        Integer obtenerTotalTicketsHoyGlobal();
 
         @Query(value = "SELECT DATE_FORMAT(MIN(fecha_hora), '%W') AS etiqueta, SUM(total) AS valor " +
                         "FROM dispensacion WHERE id_usuario = :idUsuario AND fecha_hora >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) "
@@ -56,7 +65,7 @@ public interface DispensacionRepository extends JpaRepository<Dispensacion, Inte
         @Query(value = "SELECT u.NombreUser AS etiqueta, COUNT(d.id_dispensacion) AS valor " +
                         "FROM dispensacion d " +
                         "JOIN usuario u ON d.id_usuario = u.id_usuario " +
-                        "WHERE DATE(d.fecha_hora) = CURRENT_DATE " + 
+                        "WHERE DATE(d.fecha_hora) = CURRENT_DATE " +
                         "GROUP BY u.id_usuario, u.NombreUser", nativeQuery = true)
         List<Object[]> obtenerRendimientoPersonalHoy();
 }

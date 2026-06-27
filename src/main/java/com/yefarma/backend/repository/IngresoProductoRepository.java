@@ -15,4 +15,6 @@ public interface IngresoProductoRepository extends JpaRepository<IngresoProducto
     @Query(value = "SELECT * FROM ingreso_productos WHERE id_producto = :idProducto AND cantidad_stock > 0 AND ingreso_activo = 1 ORDER BY FechaVencimiento ASC", nativeQuery = true)
     List<IngresoProducto> buscarLotesParaFEFO(@Param("idProducto") Integer idProducto);
 
+    @Query(value = "SELECT * FROM ingreso_productos ORDER BY id_ingreso DESC", nativeQuery = true)
+    List<IngresoProducto> listarHistorialCompleto();
 }

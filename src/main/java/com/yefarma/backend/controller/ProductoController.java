@@ -4,13 +4,11 @@ import com.yefarma.backend.dto.ProductoConStockDTO;
 import com.yefarma.backend.model.FormaFarmaceutica;
 import com.yefarma.backend.model.Producto;
 import com.yefarma.backend.model.TipoProducto;
-import com.yefarma.backend.model.UnidadMedida;
 import com.yefarma.backend.model.Marca;
 import com.yefarma.backend.model.Presentacion;
 import com.yefarma.backend.repository.FormaFarmaceuticaRepository;
 import com.yefarma.backend.repository.ProductoRepository;
 import com.yefarma.backend.repository.TipoProductoRepository;
-import com.yefarma.backend.repository.UnidadMedidaRepository;
 import com.yefarma.backend.repository.MarcaRepository;
 import com.yefarma.backend.repository.PresentacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +40,6 @@ public class ProductoController {
     @Autowired
     private PresentacionRepository presentacionRepository;
 
-    @Autowired
-    private UnidadMedidaRepository unidadMedidaRepository;
-
     // 1. Obtener todos los tipos (para el primer Dropdown)
     @GetMapping("/tipos")
     public List<TipoProducto> listarTipos() {
@@ -59,8 +54,7 @@ public class ProductoController {
 
     @GetMapping("/{id}/marcas")
     public ResponseEntity<List<Marca>> getMarcasPorProducto(@PathVariable Integer id) {
-        // Esta lógica asume que tienes el método en tu repositorio
-        List<Marca> marcas = productoRepository.findMarcasByProductoId(id);
+        List<Marca> marcas = marcaRepository.findAll();
         return ResponseEntity.ok(marcas);
     }
 
@@ -74,7 +68,6 @@ public class ProductoController {
     public ResponseEntity<Map<String, String>> registrarProducto(@RequestBody Producto producto) {
         Map<String, String> response = new HashMap<>();
         try {
-
             productoRepository.save(producto);
 
             response.put("status", "success");

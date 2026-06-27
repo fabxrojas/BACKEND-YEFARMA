@@ -27,7 +27,7 @@ public class ProveedorController {
             Proveedor nuevo = proveedorRepository.save(proveedor);
             return ResponseEntity.ok(nuevo);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error: El RUC ya existe o los datos son inválidos.");
+            return ResponseEntity.badRequest().body("Error: No se pudo registrar el proveedor.");
         }
     }
 
@@ -40,7 +40,7 @@ public class ProveedorController {
                 proveedor.setCorreo(proveedorDetalles.getCorreo());
                 proveedor.setDireccion(proveedorDetalles.getDireccion());
                 proveedor.setTelefono(proveedorDetalles.getTelefono());
-                
+
                 Proveedor actualizado = proveedorRepository.save(proveedor);
                 return ResponseEntity.ok(actualizado);
             })

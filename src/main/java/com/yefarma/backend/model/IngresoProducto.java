@@ -13,6 +13,10 @@ public class IngresoProducto {
     private Integer id_ingreso;
 
     @ManyToOne
+    @JoinColumn(name = "id_orden_compra")
+    private OrdenCompra ordenCompra;
+
+    @ManyToOne
     @JoinColumn(name = "id_producto")
     private Producto producto;
 
@@ -181,6 +185,14 @@ public class IngresoProducto {
 
     public void setFechaIngreso(LocalDateTime fechaIngreso) {
         this.fechaIngreso = fechaIngreso;
+    }
+
+    public OrdenCompra getOrdenCompra() {
+        return ordenCompra;
+    }
+
+    public void setOrdenCompra(OrdenCompra ordenCompra) {
+        this.ordenCompra = ordenCompra;
     }
 
 }

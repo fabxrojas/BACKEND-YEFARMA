@@ -10,81 +10,47 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
-// Imports de los modelos
+// Solo necesitamos el modelo de Marca
 import com.yefarma.backend.model.Marca;
-import com.yefarma.backend.model.Producto;
-import com.yefarma.backend.model.ProductoMarca;
 
-// Imports de los repositorios
+// Solo necesitamos el repositorio de Marca
 import com.yefarma.backend.repository.MarcaRepository;
-import com.yefarma.backend.repository.ProductoRepository;
-import com.yefarma.backend.repository.ProductoMarcaRepository;
 
 @RestController
 @RequestMapping("/api/marcas")
 public class MarcaController {
 
     @Autowired
-    private MarcaRepository marcaRepository;
-
-    @Autowired
-    private ProductoRepository productoRepository;
-
-    @Autowired
-    private ProductoMarcaRepository productoMarcaRepository;
+    private MarcaRepository marcaRepository; 
 
     @GetMapping
     public List<Marca> listarTodas() {
         return marcaRepository.findAll();
     }
 
-    //  CREAR NUEVA MARCA Y ASOCIAR
+    // CREAR NUEVA MARCA (Mantenemos la ruta para no romper Angular)
     @PostMapping("/guardar-y-asociar")
     public ResponseEntity<?> guardarYAsociar(@RequestBody Map<String, Object> payload) {
         try {
             // 1. Guardar la nueva marca
             Marca nuevaMarca = new Marca();
             nuevaMarca.setNombre(payload.get("nombreMarca").toString());
+            
             marcaRepository.save(nuevaMarca);
 
-            // 2. Crear la relación en producto_marca
-            Integer idProducto = Integer.parseInt(payload.get("idProducto").toString());
-            Producto producto = productoRepository.findById(idProducto)
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-
-            ProductoMarca asociacion = new ProductoMarca();
-            asociacion.setProducto(producto);
-            asociacion.setMarca(nuevaMarca);
-            productoMarcaRepository.save(asociacion);
-
+            // Ya no hay tabla producto_marca. Retornamos OK exitoso.
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
 
-    // ASOCIAR MARCA EXISTENTE A PRODUCTO EXISTENTE
+    // ASOCIAR MARCA EXISTENTE (Endpoint ficticio por compatibilidad)
     @PostMapping("/asociar-existente")
     public ResponseEntity<?> asociarExistente(@RequestBody Map<String, Object> payload) {
-        try {
-            Integer idMarca = Integer.parseInt(payload.get("idMarca").toString());
-            Integer idProducto = Integer.parseInt(payload.get("idProducto").toString());
-
-            // Buscar ambas entidades existentes
-            Marca marcaExistente = marcaRepository.findById(idMarca)
-                    .orElseThrow(() -> new RuntimeException("Marca no encontrada"));
-            Producto productoExistente = productoRepository.findById(idProducto)
-                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-
-            // Crear solo la asociación en la tabla intermedia
-            ProductoMarca asociacion = new ProductoMarca();
-            asociacion.setProducto(productoExistente);
-            asociacion.setMarca(marcaExistente);
-            productoMarcaRepository.save(asociacion);
-
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
-        }
+        // Al eliminar la tabla intermedia, esta operación ya no es necesaria aquí.
+        // La relación real marca-producto se creará al guardar el IngresoProducto.
+        // Retornamos OK para que el frontend (Angular) no tire un error 404 al hacer clic.
+        return ResponseEntity.ok().build();
     }
 }

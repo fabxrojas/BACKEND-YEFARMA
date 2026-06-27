@@ -14,12 +14,13 @@ public class GuiaRemision {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id_guia;
 
-    @Column(name = "Codigo_guia", nullable = false, unique = true)
+    // insertable=false y updatable=false aseguran que el TRIGGER de tu BD funcione
+    @Column(name = "Codigo_guia", unique = true, insertable = false, updatable = false)
     private String codigoGuia;
 
     @ManyToOne
-    @JoinColumn(name = "id_proveedor")
-    private Proveedor proveedor;
+    @JoinColumn(name = "id_cliente") 
+    private Cliente cliente;
 
     @ManyToOne
     @JoinColumn(name = "id_establecimiento")
@@ -29,7 +30,6 @@ public class GuiaRemision {
     @JoinColumn(name = "id_estado")
     private EstadoRemision estado;
 
-    // 1. AGREGAR MOTIVO DE TRASLADO (Obligatorio para SUNAT)
     @ManyToOne
     @JoinColumn(name = "id_motivo", nullable = false)
     private MotivoTraslado motivo;
@@ -37,7 +37,6 @@ public class GuiaRemision {
     @Column(name = "punto_partida")
     private String puntoPartida;
 
-    // 2. AGREGAR PUNTO DE LLEGADA (Obligatorio para SUNAT)
     @Column(name = "punto_llegada", nullable = false)
     private String puntoLlegada;
 
@@ -50,136 +49,57 @@ public class GuiaRemision {
     @Column(name = "peso_bruto_total", precision = 12, scale = 5)
     private BigDecimal pesoBrutoTotal;
 
-    @Column(name = "FechaEmision")
-    private LocalDate fechaEmision;
+    // --- AQUÍ ESTÁ EL CAMBIO DE FECHA ---
+    @Column(name = "fechaemision", insertable = false, updatable = false)
+    private LocalDateTime fechaEmision;
 
     @Column(name = "FechaTraslado", nullable = false)
     private LocalDate fechaTraslado;
 
-    @Column(name = "FechaCreacion", insertable = false, updatable = false)
-    private LocalDateTime fechaCreacion;
-
     @OneToMany(mappedBy = "guia", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleGuia> detalles;
 
-    public Integer getId_guia() {
-        return id_guia;
-    }
+    // --- GETTERS Y SETTERS ---
 
-    public void setId_guia(Integer id_guia) {
-        this.id_guia = id_guia;
-    }
+    public Integer getId_guia() { return id_guia; }
+    public void setId_guia(Integer id_guia) { this.id_guia = id_guia; }
 
-    public String getCodigoGuia() {
-        return codigoGuia;
-    }
+    public String getCodigoGuia() { return codigoGuia; }
+    public void setCodigoGuia(String codigoGuia) { this.codigoGuia = codigoGuia; }
 
-    public void setCodigoGuia(String codigoGuia) {
-        this.codigoGuia = codigoGuia;
-    }
+    public Cliente getCliente() { return cliente; }
+    public void setCliente(Cliente cliente) { this.cliente = cliente; }
 
-    public Proveedor getProveedor() {
-        return proveedor;
-    }
+    public Establecimiento getEstablecimiento() { return establecimiento; }
+    public void setEstablecimiento(Establecimiento establecimiento) { this.establecimiento = establecimiento; }
 
-    public void setProveedor(Proveedor proveedor) {
-        this.proveedor = proveedor;
-    }
+    public EstadoRemision getEstado() { return estado; }
+    public void setEstado(EstadoRemision estado) { this.estado = estado; }
 
-    public Establecimiento getEstablecimiento() {
-        return establecimiento;
-    }
+    public MotivoTraslado getMotivo() { return motivo; }
+    public void setMotivo(MotivoTraslado motivo) { this.motivo = motivo; }
 
-    public void setEstablecimiento(Establecimiento establecimiento) {
-        this.establecimiento = establecimiento;
-    }
+    public String getPuntoPartida() { return puntoPartida; }
+    public void setPuntoPartida(String puntoPartida) { this.puntoPartida = puntoPartida; }
 
-    public EstadoRemision getEstado() {
-        return estado;
-    }
+    public String getPuntoLlegada() { return puntoLlegada; }
+    public void setPuntoLlegada(String puntoLlegada) { this.puntoLlegada = puntoLlegada; }
 
-    public void setEstado(EstadoRemision estado) {
-        this.estado = estado;
-    }
+    public String getPlacaVehiculo() { return placaVehiculo; }
+    public void setPlacaVehiculo(String placaVehiculo) { this.placaVehiculo = placaVehiculo; }
 
-    public MotivoTraslado getMotivo() {
-        return motivo;
-    }
+    public String getLicenciaConductor() { return licenciaConductor; }
+    public void setLicenciaConductor(String licenciaConductor) { this.licenciaConductor = licenciaConductor; }
 
-    public void setMotivo(MotivoTraslado motivo) {
-        this.motivo = motivo;
-    }
+    public BigDecimal getPesoBrutoTotal() { return pesoBrutoTotal; }
+    public void setPesoBrutoTotal(BigDecimal pesoBrutoTotal) { this.pesoBrutoTotal = pesoBrutoTotal; }
 
-    public String getPuntoPartida() {
-        return puntoPartida;
-    }
+    public LocalDateTime getFechaEmision() { return fechaEmision; }
+    public void setFechaEmision(LocalDateTime fechaEmision) { this.fechaEmision = fechaEmision; }
 
-    public void setPuntoPartida(String puntoPartida) {
-        this.puntoPartida = puntoPartida;
-    }
+    public LocalDate getFechaTraslado() { return fechaTraslado; }
+    public void setFechaTraslado(LocalDate fechaTraslado) { this.fechaTraslado = fechaTraslado; }
 
-    public String getPuntoLlegada() {
-        return puntoLlegada;
-    }
-
-    public void setPuntoLlegada(String puntoLlegada) {
-        this.puntoLlegada = puntoLlegada;
-    }
-
-    public String getPlacaVehiculo() {
-        return placaVehiculo;
-    }
-
-    public void setPlacaVehiculo(String placaVehiculo) {
-        this.placaVehiculo = placaVehiculo;
-    }
-
-    public String getLicenciaConductor() {
-        return licenciaConductor;
-    }
-
-    public void setLicenciaConductor(String licenciaConductor) {
-        this.licenciaConductor = licenciaConductor;
-    }
-
-    public BigDecimal getPesoBrutoTotal() {
-        return pesoBrutoTotal;
-    }
-
-    public void setPesoBrutoTotal(BigDecimal pesoBrutoTotal) {
-        this.pesoBrutoTotal = pesoBrutoTotal;
-    }
-
-    public LocalDate getFechaEmision() {
-        return fechaEmision;
-    }
-
-    public void setFechaEmision(LocalDate fechaEmision) {
-        this.fechaEmision = fechaEmision;
-    }
-
-    public LocalDate getFechaTraslado() {
-        return fechaTraslado;
-    }
-
-    public void setFechaTraslado(LocalDate fechaTraslado) {
-        this.fechaTraslado = fechaTraslado;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public List<DetalleGuia> getDetalles() {
-        return detalles;
-    }
-
-    public void setDetalles(List<DetalleGuia> detalles) {
-        this.detalles = detalles;
-    }
-
+    public List<DetalleGuia> getDetalles() { return detalles; }
+    public void setDetalles(List<DetalleGuia> detalles) { this.detalles = detalles; }
 }

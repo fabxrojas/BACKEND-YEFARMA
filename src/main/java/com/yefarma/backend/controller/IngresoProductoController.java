@@ -27,4 +27,15 @@ public class IngresoProductoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/historial")
+    public ResponseEntity<List<IngresoProducto>> listarHistorial() {
+        try {
+            List<IngresoProducto> historial = ingresoService.obtenerHistorialRecepciones();
+            return ResponseEntity.ok(historial);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

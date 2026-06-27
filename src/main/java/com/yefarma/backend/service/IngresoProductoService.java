@@ -19,6 +19,10 @@ public class IngresoProductoService {
     @Autowired private ProveedorRepository proveedorRepository;
     @Autowired private PresentacionRepository presentacionRepository;
     @Autowired private UnidadMedidaRepository unidadMedidaRepository;
+    
+    // NUEVAS INYECCIONES PARA ACTUALIZAR LA ORDEN DE COMPRA
+    @Autowired private OrdenCompraRepository ordenCompraRepository;
+    @Autowired private EstadoOrdenRepository estadoOrdenRepository;
 
     @Transactional
     public List<IngresoProducto> registrarIngresoBatch(List<IngresoProducto> detallesIngreso) {
@@ -69,10 +73,37 @@ public class IngresoProductoService {
                 ingreso.setUnidad(unidadReal);
             }
 
+            // 7. Vincular Orden de Compra
+            if (ingreso.getOrdenCompra() != null && ingreso.getOrdenCompra().getIdOrden() != null) {
+                OrdenCompra ocReal = ordenCompraRepository.findById(ingreso.getOrdenCompra().getIdOrden())
+                        .orElseThrow(() -> new RuntimeException("Orden de Compra no encontrada"));
+                ingreso.setOrdenCompra(ocReal);
+            }
+
             return ingreso;
         }).collect(Collectors.toList());
 
-        // Ahora guardamos la lista con todas las entidades vinculadas correctamente
-        return ingresoRepository.saveAll(ingresosProcesados);
+        // Guardamos los ingresos físicos en el almacén
+        List<IngresoProducto> ingresosGuardados = ingresoRepository.saveAll(ingresosProcesados);
+
+        // 8. CAMBIAR EL ESTADO DE LA ORDEN DE COMPRA A "RECEPCIONADA"
+        if (!detallesIngreso.isEmpty() && detallesIngreso.get(0).getOrdenCompra() != null) {
+            Integer idOrden = detallesIngreso.get(0).getOrdenCompra().getIdOrden();
+            OrdenCompra ordenActualizar = ordenCompraRepository.findById(idOrden)
+                    .orElseThrow(() -> new RuntimeException("Orden de compra no encontrada para actualizar estado"));
+            
+            // Buscamos el estado 'RECEPCIONADA' en la BD
+            EstadoOrden estadoRecepcionada = estadoOrdenRepository.findByDescripcion("RECEPCIONADA")
+                    .orElseThrow(() -> new RuntimeException("El estado 'RECEPCIONADA' no existe en la BD"));
+            
+            ordenActualizar.setEstado(estadoRecepcionada);
+            ordenCompraRepository.save(ordenActualizar); 
+        }
+
+        return ingresosGuardados;
+    }
+
+    public List<IngresoProducto> obtenerHistorialRecepciones() {
+        return ingresoRepository.listarHistorialCompleto();
     }
 }

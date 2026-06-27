@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UnidadesDetalleRepository extends JpaRepository<UnidadesDetalle, Long> {
-    
+public interface UnidadesDetalleRepository extends JpaRepository<UnidadesDetalle, Integer> {
+    // Cambiado de Long a Integer
 }

@@ -17,7 +17,7 @@ public class DashboardService {
         @Autowired
         private DispensacionRepository dispRepo;
         @Autowired
-        private ProductoRepository prodRepo;
+        private ProductoRepository prodRepo; 
 
         // 1. MÉTODO GLOBAL (Para administradores o vista general)
         public DashboardDTO getDashboardData() {

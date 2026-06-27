@@ -3,7 +3,6 @@ package com.yefarma.backend.repository;
 import com.yefarma.backend.dto.ProductoAlertaDTO;
 import com.yefarma.backend.dto.ProductoConStockDTO;
 import com.yefarma.backend.dto.ProductoRankingDTO;
-import com.yefarma.backend.model.Marca;
 import com.yefarma.backend.model.Producto;
 
 import org.springframework.data.domain.Pageable;
@@ -19,10 +18,6 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
 
         // Búsqueda básica por nombre (Entidad Producto)
         List<Producto> findByProductoContainingIgnoreCase(String nombre);
-
-        // Obtener marcas por producto
-        @Query("SELECT m FROM Marca m JOIN ProductoMarca pm ON m.id_marca = pm.marca.id_marca WHERE pm.producto.id_producto = :idProducto")
-        List<Marca> findMarcasByProductoId(@Param("idProducto") Integer idProducto);
 
         @Query("SELECT new com.yefarma.backend.dto.ProductoConStockDTO(" +
                         "p.id_producto, p.producto, p.codigo, p.precio, SUM(COALESCE(i.cantidadStock, 0))) " +
