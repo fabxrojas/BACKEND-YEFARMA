@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID; // IMPORTANTE
 
 @Entity
 @Table(name = "guia_remision")
@@ -14,9 +15,13 @@ public class GuiaRemision {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id_guia;
 
-    // insertable=false y updatable=false aseguran que el TRIGGER de tu BD funcione
+    // insertable=false y updatable=false aseguran que el TRIGGER (Ej: EG01-...) funcione
     @Column(name = "Codigo_guia", unique = true, insertable = false, updatable = false)
     private String codigoGuia;
+
+    // --- NUEVO: TOKEN PÚBLICO DE SEGURIDAD PARA EL QR ---
+    @Column(name = "token_publico", unique = true, updatable = false)
+    private String tokenPublico = UUID.randomUUID().toString();
 
     @ManyToOne
     @JoinColumn(name = "id_cliente") 
@@ -49,7 +54,6 @@ public class GuiaRemision {
     @Column(name = "peso_bruto_total", precision = 12, scale = 5)
     private BigDecimal pesoBrutoTotal;
 
-    // --- AQUÍ ESTÁ EL CAMBIO DE FECHA ---
     @Column(name = "fechaemision", insertable = false, updatable = false)
     private LocalDateTime fechaEmision;
 
@@ -66,6 +70,10 @@ public class GuiaRemision {
 
     public String getCodigoGuia() { return codigoGuia; }
     public void setCodigoGuia(String codigoGuia) { this.codigoGuia = codigoGuia; }
+
+    // Getter y Setter del Token
+    public String getTokenPublico() { return tokenPublico; }
+    public void setTokenPublico(String tokenPublico) { this.tokenPublico = tokenPublico; }
 
     public Cliente getCliente() { return cliente; }
     public void setCliente(Cliente cliente) { this.cliente = cliente; }

@@ -8,4 +8,5 @@ import java.util.Optional;
 @Repository
 public interface OrdenCompraRepository extends JpaRepository<OrdenCompra, Integer> {
     Optional<OrdenCompra> findByCodigoOrden(String codigoOrden);
+    Optional<OrdenCompra> findByTokenPublico(String tokenPublico); 
 }

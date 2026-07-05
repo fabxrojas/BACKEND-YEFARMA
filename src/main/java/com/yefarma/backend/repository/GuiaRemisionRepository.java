@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface GuiaRemisionRepository extends JpaRepository<GuiaRemision, Integer> {
 
     Optional<GuiaRemision> findByCodigoGuia(String codigoGuia);
+    Optional<GuiaRemision> findByTokenPublico(String tokenPublico);
     
 }

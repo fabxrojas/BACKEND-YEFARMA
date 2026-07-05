@@ -33,6 +33,8 @@ public class SecurityConfig {
                 return config;
             }))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/ordenes-compra/pdf/**").permitAll()
+                .requestMatchers("/api/guias-remision/pdf/**").permitAll()
                 .anyRequest().permitAll() 
             );
         

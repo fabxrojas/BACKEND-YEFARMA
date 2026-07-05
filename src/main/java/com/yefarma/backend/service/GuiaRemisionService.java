@@ -84,6 +84,10 @@ public class GuiaRemisionService {
         return guiaRepository.findById(id).orElse(null);
     }
 
+    public GuiaRemision buscarPorTokenPublico(String tokenPublico) {
+        return guiaRepository.findByTokenPublico(tokenPublico).orElse(null);
+    }
+
     public GuiaRemision buscarPorCodigo(String codigoGuia) {
         return guiaRepository.findByCodigoGuia(codigoGuia).orElse(null);
     }

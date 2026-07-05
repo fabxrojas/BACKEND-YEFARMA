@@ -10,7 +10,6 @@ import com.yefarma.backend.repository.IngresoProductoRepository;
 import com.yefarma.backend.repository.OrdenCompraRepository;
 import com.yefarma.backend.repository.ProductoRepository;
 
-// IMPORTACIONES NECESARIAS PARA EL ENTITY MANAGER
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +37,6 @@ public class OrdenCompraService {
     @Autowired
     private IngresoProductoRepository ingresoRepository;
 
-    // AQUI DECLARAMOS EL ENTITY MANAGER (Faltaba esta parte o el import)
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -51,6 +50,12 @@ public class OrdenCompraService {
         }
         if (orden.getDetalles() == null || orden.getDetalles().isEmpty()) {
             throw new RuntimeException("La orden debe tener al menos un producto.");
+        }
+
+        // --- ASIGNACIÓN DE FECHA DE EMISIÓN ---
+        // Si viene nula desde Angular, le asignamos la fecha y hora actual del servidor
+        if (orden.getFechaEmision() == null) {
+            orden.setFechaEmision(LocalDateTime.now());
         }
 
         BigDecimal totalOrden = BigDecimal.ZERO;
@@ -76,6 +81,7 @@ public class OrdenCompraService {
 
         EstadoOrden estadoInicial = estadoOrdenRepository.findByDescripcion("EMITIDA")
                 .orElseThrow(() -> new RuntimeException("El estado 'EMITIDA' no existe en la base de datos."));
+
         orden.setEstado(estadoInicial);
 
         OrdenCompra ordenGuardada = ordenCompraRepository.save(orden);
@@ -90,12 +96,10 @@ public class OrdenCompraService {
         OrdenCompra oc = ordenCompraRepository.findById(idOrden)
                 .orElseThrow(() -> new RuntimeException("Orden de Compra no encontrada."));
 
-        // 1. Cambiamos el estado de la Orden a ANULADA
         EstadoOrden estadoAnulada = estadoOrdenRepository.findByDescripcion("ANULADA")
                 .orElseThrow(() -> new RuntimeException("Estado 'ANULADA' no existe en la BD."));
         oc.setEstado(estadoAnulada);
 
-        // 2. BUSCAMOS INGRESOS FÍSICOS ASOCIADOS A ESTA OC Y LOS DESACTIVAMOS
         List<IngresoProducto> ingresosAsociados = ingresoRepository.findAll().stream()
                 .filter(ingreso -> ingreso.getOrdenCompra() != null
                         && ingreso.getOrdenCompra().getIdOrden().equals(idOrden))
@@ -119,5 +123,9 @@ public class OrdenCompraService {
 
     public OrdenCompra buscarPorId(Integer id) {
         return ordenCompraRepository.findById(id).orElse(null);
+    }
+
+    public OrdenCompra buscarPorTokenPublico(String tokenPublico) {
+        return ordenCompraRepository.findByTokenPublico(tokenPublico).orElse(null);
     }
 }
