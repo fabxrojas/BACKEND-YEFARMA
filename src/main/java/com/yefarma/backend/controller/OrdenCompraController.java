@@ -233,12 +233,10 @@ public class OrdenCompraController {
             document.add(new Paragraph("\n")); 
 
             // 5. CÓDIGO QR SEGURO
-            //String ipLocal = "192.168.100.3"; // IP que obtengas de tu ipconfig
-            //String puerto = "8081";
+            String ipLocal = "192.168.100.3"; // IP que obtengas de tu ipconfig
+            String puerto = "8081";
 
-           // 6. CÓDIGO QR PARA LA NUBE
-            // Reemplaza "yefarma-api.onrender.com" por tu link real de Render
-            String urlOrden = "https://backend-yefarma.onrender.com/api/ordenes-compra/publico/" + orden.getTokenPublico();
+            String urlOrden = "http://" + ipLocal + ":" + puerto + "/api/ordenes-compra/publico/" + orden.getTokenPublico();
             Image imagenQR = generarCodigoQR(urlOrden);
             if (imagenQR != null) {
                 document.add(imagenQR);

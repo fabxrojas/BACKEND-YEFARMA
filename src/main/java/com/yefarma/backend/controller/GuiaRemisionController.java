@@ -102,7 +102,7 @@ public class GuiaRemisionController {
     }
 
     // =======================================================
-    // GENERACIÓN DE PDF - DISEÑO OFICIAL SUNAT (CAJAS)
+    // GENERACIÓN DE PDF - DISEÑO OFICIAL SUNAT 
     // =======================================================
     @GetMapping("/pdf/{id}")
     public ResponseEntity<byte[]> generarPdf(@PathVariable Integer id) {
@@ -276,7 +276,7 @@ public class GuiaRemisionController {
             cPesoTotal.setPadding(8f);
             cPesoTotal.addElement(new Paragraph("Peso Bruto Total", fontBold));
             
-            Paragraph pKilos = new Paragraph(guia.getPesoBrutoTotal() + " KG", fontTituloEmpresa);
+            Paragraph pKilos = new Paragraph(guia.getPesoBrutoTotal() + " KGM", fontTituloEmpresa);
             pKilos.setAlignment(Element.ALIGN_CENTER);
             cPesoTotal.addElement(new Paragraph("\n"));
             cPesoTotal.addElement(pKilos);
@@ -287,10 +287,10 @@ public class GuiaRemisionController {
             document.add(new Paragraph("\n")); 
 
             // 6. CÓDIGO QR
-            //String ipLocal = "192.168.100.3"; // IP que obtengas de tu ipconfig
-            //String puerto = "8081";
+            String ipLocal = "192.168.100.3"; // IP que obtengas de tu ipconfig
+            String puerto = "8081";
 
-            String urlGuia = "https://backend-yefarma.onrender.com/api/guias-remision/publico/" + guia.getTokenPublico();
+            String urlGuia = "http://" + ipLocal + ":" + puerto + "/api/guias-remision/publico/" + guia.getTokenPublico();
             Image imagenQR = generarCodigoQR(urlGuia);
             
             if (imagenQR != null) {
