@@ -26,7 +26,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) 
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(List.of("http://localhost:4200"));
+                
+                // ACTUALIZACIÓN CLAVE: Permite conexiones desde tu localhost o desde cualquier URL de la nube
+                config.setAllowedOriginPatterns(List.of("*"));
+                
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowedHeaders(List.of("*")); 
                 config.setAllowCredentials(true);
@@ -35,6 +38,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/ordenes-compra/pdf/**").permitAll()
                 .requestMatchers("/api/guias-remision/pdf/**").permitAll()
+                .requestMatchers("/api/guias-remision/publico/**").permitAll() // Se asegura el pase libre al endpoint del QR
                 .anyRequest().permitAll() 
             );
         

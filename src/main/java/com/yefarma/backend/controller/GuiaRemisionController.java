@@ -276,7 +276,7 @@ public class GuiaRemisionController {
             cPesoTotal.setPadding(8f);
             cPesoTotal.addElement(new Paragraph("Peso Bruto Total", fontBold));
             
-            Paragraph pKilos = new Paragraph(guia.getPesoBrutoTotal() + " KGM", fontTituloEmpresa);
+            Paragraph pKilos = new Paragraph(guia.getPesoBrutoTotal() + " KG", fontTituloEmpresa);
             pKilos.setAlignment(Element.ALIGN_CENTER);
             cPesoTotal.addElement(new Paragraph("\n"));
             cPesoTotal.addElement(pKilos);
@@ -287,7 +287,10 @@ public class GuiaRemisionController {
             document.add(new Paragraph("\n")); 
 
             // 6. CÓDIGO QR
-            String urlGuia = "https://yefarma-api.onrender.com/api/guias-remision/publico/" + guia.getTokenPublico();
+            //String ipLocal = "192.168.100.3"; // IP que obtengas de tu ipconfig
+            //String puerto = "8081";
+
+            String urlGuia = "https://backend-yefarma.onrender.com/api/guias-remision/publico/" + guia.getTokenPublico();
             Image imagenQR = generarCodigoQR(urlGuia);
             
             if (imagenQR != null) {
@@ -303,7 +306,8 @@ public class GuiaRemisionController {
             // 7. PREPARAR RESPUESTA HTTP
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("attachment", "Guia_Remision_" + guia.getCodigoGuia() + ".pdf");
+            // Al usar "inline", el navegador abrirá el PDF para visualizarlo en lugar de descargarlo de golpe
+            headers.add("Content-Disposition", "inline; filename=Guia_Remision_" + guia.getCodigoGuia() + ".pdf");
 
             return new ResponseEntity<>(out.toByteArray(), headers, HttpStatus.OK);
 

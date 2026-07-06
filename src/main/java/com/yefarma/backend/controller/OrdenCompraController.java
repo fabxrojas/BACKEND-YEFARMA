@@ -76,7 +76,7 @@ public class OrdenCompraController {
             BitMatrix bitMatrix = qrCodeWriter.encode(urlTexto, BarcodeFormat.QR_CODE, 150, 150);
             ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
-            
+
             Image qrImage = Image.getInstance(pngOutputStream.toByteArray());
             qrImage.setAlignment(Image.ALIGN_CENTER); // Centrado para la OC
             return qrImage;
@@ -233,7 +233,12 @@ public class OrdenCompraController {
             document.add(new Paragraph("\n")); 
 
             // 5. CÓDIGO QR SEGURO
-            String urlOrden = "http://192.168.100.3:8081/api/ordenes-compra/publico/" + orden.getTokenPublico();
+            //String ipLocal = "192.168.100.3"; // IP que obtengas de tu ipconfig
+            //String puerto = "8081";
+
+           // 6. CÓDIGO QR PARA LA NUBE
+            // Reemplaza "yefarma-api.onrender.com" por tu link real de Render
+            String urlOrden = "https://backend-yefarma.onrender.com/api/ordenes-compra/publico/" + orden.getTokenPublico();
             Image imagenQR = generarCodigoQR(urlOrden);
             if (imagenQR != null) {
                 document.add(imagenQR);
@@ -248,7 +253,8 @@ public class OrdenCompraController {
             // 6. RESPUESTA HTTP
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=OrdenCompra_" + orden.getCodigoOrden() + ".pdf");
+            // Al usar "inline", el navegador abrirá el PDF para visualizarlo en lugar de descargarlo de golpe
+            headers.add("Content-Disposition", "inline; filename=Orden_Compra_" + orden.getCodigoOrden() + ".pdf");
 
             return new ResponseEntity<>(out.toByteArray(), headers, HttpStatus.OK);
 

@@ -30,12 +30,16 @@ public class AuthController {
 
     @Async
     private void enviarEmailCodigo(String destino, String codigo) {
-        SimpleMailMessage mensaje = new SimpleMailMessage();
-        mensaje.setTo(destino);
-        mensaje.setSubject("Código de Verificación - Yefarma");
-        mensaje.setText("Tu código de verificación para ingresar al sistema es: " + codigo +
-                "\nEste código expirará en 5 minutos.");
-        mailSender.send(mensaje);
+        try {
+            SimpleMailMessage mensaje = new SimpleMailMessage();
+            mensaje.setTo(destino);
+            mensaje.setSubject("Código de Verificación - Yefarma");
+            mensaje.setText("Tu código de verificación para ingresar al sistema es: " + codigo +
+                    "\nEste código expirará en 5 minutos.");
+            mailSender.send(mensaje);
+        } catch (Exception e) {
+            System.out.println("Error de correo en la nube ignorado: " + e.getMessage());
+        }
     }
 
     /*
@@ -70,7 +74,7 @@ public class AuthController {
      * }
      */
 
-    @Transactional 
+    @Transactional
     @PostMapping("/login-paso1")
     public ResponseEntity<?> loginPaso1(@RequestBody Map<String, String> loginData) {
         String username = loginData.get("username");
@@ -118,8 +122,7 @@ public class AuthController {
                             "token", token,
                             "rol", usuario.getIdRol(),
                             "idUsuario", usuario.getIdUsuario(),
-                            "nombre", usuario.getNombreUser() 
-                    ));
+                            "nombre", usuario.getNombreUser()));
                 } else {
                     return ResponseEntity.status(401).body(Map.of("message", "Código expirado"));
                 }
