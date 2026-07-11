@@ -46,10 +46,12 @@ public class IngresoProductoService {
             }
 
             // 3. Vincular Marca
-            if (ingreso.getMarca() != null) {
+            if (ingreso.getMarca() != null && ingreso.getMarca().getId_marca() != null) {
                 Marca marcaReal = marcaRepository.findById(ingreso.getMarca().getId_marca())
-                        .orElseThrow(() -> new RuntimeException("Marca no encontrada"));
+                        .orElseThrow(() -> new RuntimeException("Marca no encontrada en la BD"));
                 ingreso.setMarca(marcaReal);
+            } else {
+                throw new RuntimeException("ERROR: El sistema intentó guardar un ingreso sin Marca.");
             }
 
             // 4. Vincular Proveedor
@@ -60,10 +62,12 @@ public class IngresoProductoService {
             }
 
             // 5. Vincular Presentación
-            if (ingreso.getPresentacion() != null) {
+            if (ingreso.getPresentacion() != null && ingreso.getPresentacion().getId_presentacion() != null) {
                 Presentacion presReal = presentacionRepository.findById(ingreso.getPresentacion().getId_presentacion())
-                        .orElseThrow(() -> new RuntimeException("Presentación no encontrada"));
+                        .orElseThrow(() -> new RuntimeException("Presentación no encontrada en la BD"));
                 ingreso.setPresentacion(presReal);
+            } else {
+                throw new RuntimeException("ERROR: El sistema intentó guardar un ingreso sin Presentación.");
             }
 
             // 6. Vincular Unidad de Medida

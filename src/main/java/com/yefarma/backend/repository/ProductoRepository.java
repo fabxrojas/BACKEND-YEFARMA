@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Integer> {
@@ -77,4 +78,6 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> {
                         "GROUP BY p.id_producto, p.producto, p.codigo, p.precio " +
                         "HAVING SUM(COALESCE(i.cantidadStock, 0)) < 10")
         List<ProductoConStockDTO> obtenerDetalleStockBajo();
+
+        Optional<Producto> findByRegistroSanitario(String registroSanitario);
 }

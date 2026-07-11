@@ -68,6 +68,19 @@ public class ProductoController {
     public ResponseEntity<Map<String, String>> registrarProducto(@RequestBody Producto producto) {
         Map<String, String> response = new HashMap<>();
         try {
+            // VALIDACIÓN: Verificar si el Registro Sanitario ya existe (siempre que no venga vacío)
+            if (producto.getRegistroSanitario() != null && !producto.getRegistroSanitario().trim().isEmpty()) {
+                
+                java.util.Optional<Producto> existente = productoRepository.findByRegistroSanitario(producto.getRegistroSanitario().trim());
+                
+                // Si existe un producto con ese registro, y NO es el mismo producto que estamos editando...
+                if (existente.isPresent() && !existente.get().getId_producto().equals(producto.getId_producto())) {
+                    response.put("status", "error");
+                    response.put("message", "El Registro Sanitario '" + producto.getRegistroSanitario() + "' ya le pertenece a otro medicamento.");
+                    return ResponseEntity.badRequest().body(response);
+                }
+            }
+
             productoRepository.save(producto);
 
             response.put("status", "success");
